@@ -1,0 +1,34 @@
+meu-projeto/
+│── pom.xml                       # dependências e build
+│
+└── src/
+    ├── main/
+    │   ├── java/
+    │   │   └── com/
+    │   │       └── exemplo/
+    │   │           └── projeto/
+    │   │               ├── MeuProjetoApplication.java                  # classe principal
+    │   │               │
+    │   │               ├── model/       # entidades JPA                # Suas classes @Entity (representam tabelas no banco).
+    │   │               │   └── Cliente.java
+    │   │               │
+    │   │               ├── repository/  # interfaces JpaRepository     # Interfaces que estendem JpaRepository (CRUD automático).
+    │   │               │   └── ClienteRepository.java
+    │   │               │
+    │   │               ├── service/     # regras de negócio            # Classes de lógica de negócio, anotadas com @Service.
+    │   │               │   └── ClienteService.java
+    │   │               │
+    │   │               └── controller/  # APIs REST                    # Classes @RestController que expõem endpoints da API.
+    │   │                   └── ClienteController.java
+    │   │
+    │   └── resources/
+    │       ├── application.properties   # configs (DB, porta, etc)
+    │       ├── static/                  # arquivos estáticos (css, js, imgs)
+    │       └── templates/               # páginas thymeleaf (se usar)
+    │
+    └── test/
+        └── java/
+            └── com/
+                └── exemplo/
+                    └── projeto/
+                        └── MeuProjetoApplicationTests.java
