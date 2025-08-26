@@ -1,21 +1,23 @@
 DROP TABLE IF EXISTS usuario CASCADE;
 DROP TABLE IF EXISTS post CASCADE;
 
-Create Table usuario(
-id_usuario SERIAL PRIMARY KEY,
-nome varchar(255) not null,
-idade integer
+CREATE TABLE usuario (
+    id_usuario SERIAL PRIMARY KEY,
+    nome VARCHAR(255) NOT NULL,
+    idade INT
 );
 
-Create Table post(
-id_post serial primary key,
-titulo varchar(255) not null,
-mensagem text,
-author integer references usuario(id_usuario)ON DELETE CASCADE
+CREATE TABLE post (
+    id_post SERIAL PRIMARY KEY,
+    titulo VARCHAR(255) NOT NULL,
+    descricao TEXT,
+    data TIMESTAMP NOT NULL,
+    id_author BIGINT NOT NULL,
+    CONSTRAINT fk_author FOREIGN KEY (id_author) REFERENCES usuario(id_usuario)
 );
 
 INSERT INTO usuario (nome, idade) VALUES ('vanda', 18),('zawer',30);
-INSERT INTO post (titulo, author, mensagem) values ('zawer adventure',2,'um mundo novo'),('vanda adventure',1,'kkkkkk');
+INSERT INTO post (titulo, author, mensagem, id_author)
 
 select * from usuario;
 select * from post;
