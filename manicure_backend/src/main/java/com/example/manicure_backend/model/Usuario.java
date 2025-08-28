@@ -2,10 +2,12 @@ package com.example.manicure_backend.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.EnumType;
 
 @Entity
 @Table(name = "usuario")
@@ -19,6 +21,16 @@ public class Usuario {
     private String nome;
 
     private Integer idade;
+
+    private String senha;
+
+    private String email;
+
+    private String urlFotoPerfil;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Sexo sexo;
 
     // Getters e Setters
     public Long getIdUsuario() {
@@ -44,4 +56,37 @@ public class Usuario {
     public void setIdade(Integer idade) {
         this.idade = idade;
     }
+
+    public String getSenha() {
+        return senha;
+    }
+
+    public void setSenha(String senha) {
+        this.senha = senha;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getUrlFotoPerfil() {
+        return urlFotoPerfil;
+    }
+
+    public void setUrlFotoPerfil(String urlFotoPerfil) {
+        this.urlFotoPerfil = urlFotoPerfil;
+    }
+
+    public Sexo getSexo() {
+        return sexo;
+    }
+
+    public void setSexo(Sexo sexo) {
+        this.sexo = sexo;
+    }
+
 }

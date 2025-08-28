@@ -30,6 +30,8 @@ public class UsuarioService {
         return usuarioRepository.findById(id).map(usuario -> {
             usuario.setNome(usuarioAtualizado.getNome());
             usuario.setIdade(usuarioAtualizado.getIdade());
+            usuario.setEmail(usuarioAtualizado.getEmail());
+            usuario.setSenha(usuarioAtualizado.getSenha());
             return usuarioRepository.save(usuario);
         });
     }
