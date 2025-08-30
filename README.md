@@ -2,14 +2,20 @@
 projeto para website 
 
 ## GET
-- #### `http://localhost:8080/usuarios` ou `usuarios/id`
-- #### `http://localhost:8080/posts` ou `posts/id`
+`http://localhost:8080/usuarios` ou `usuarios/id`
+<br>`http://localhost:8080/posts` ou `posts/id`
+<br>`http://localhost:8080/auth` ou `/register`
+<br>`http://localhost:8080/agendamentos`
 
 ## POST
 - ### como fazer um post na tabela usuario<br>
 `{
-  "nome": "meu nome",
-  "idade": 18
+  "nome": "noem",
+  "idade": 18,
+  "senha": "12345",
+  "email": "email@email.com",
+  "urlFotoPerfil": "URL para algum ponto",
+  "sexo": "F ou M"
 }`
 - ### como fazer um post na tabela post<br>
 `{
@@ -19,6 +25,21 @@ projeto para website
     "idUsuario": id author(quem fez)
   }
 }`
+- ### como fazer um post na tabela agendamento
+`{
+  "manicure": {
+    "idUsuario": id_da_manicure
+  },
+  "usuario": {
+    "idUsuario": id_do_cliente
+  },
+  "descricao": "Unha decorada com esmalte vermelho",
+  "data": "yyyy-mm-dd",
+  "hora": "hh:mm",
+  "status": "AGENDADO" ou "CANCELADO" ou "CONCLUIDO",
+  "valor": 00.0
+}`
+
 
 ## PUT
 - ### usuarios<br>

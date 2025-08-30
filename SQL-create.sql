@@ -47,14 +47,18 @@ CREATE TABLE avaliacao (
 
 -- Agendamento
 CREATE TABLE agendamento (
-    id_avaliacao SERIAL PRIMARY KEY,
-    id_usuario INT NOT NULL,
-    id_manicure INT NOT NULL,
+    id_agendamento SERIAL PRIMARY KEY,
+    id_manicure BIGINT NOT NULL REFERENCES usuario(id_usuario),
+    id_usuario BIGINT NOT NULL REFERENCES usuario(id_usuario),
     descricao TEXT,
-    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_agendamento_usuario FOREIGN KEY (id_usuario) REFERENCES usuario(id_usuario) ON DELETE CASCADE,
-    CONSTRAINT fk_agendamento_manicure FOREIGN KEY (id_manicure) REFERENCES usuario(id_usuario) ON DELETE CASCADE
+    data DATE NOT NULL,
+    hora TIME,
+    status VARCHAR(20) DEFAULT 'AGENDADO',
+    valor DECIMAL(10,2),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
 
 -- Dados iniciais de teste
 INSERT INTO usuario (nome, email, senha, idade, sexo) 

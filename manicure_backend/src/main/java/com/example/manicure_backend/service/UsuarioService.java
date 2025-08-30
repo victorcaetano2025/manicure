@@ -10,6 +10,17 @@ import java.util.Optional;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
 
+    // Cadastrar
+    public Usuario cadastrar(Usuario usuario) {
+        return usuarioRepository.save(usuario);
+    }
+
+    // Login simples: email + senha
+    public Optional<Usuario> login(String email, String senha) {
+        return usuarioRepository.findByEmail(email)
+                .filter(user -> user.getSenha().equals(senha));
+    }
+
     public UsuarioService(UsuarioRepository usuarioRepository) {
         this.usuarioRepository = usuarioRepository;
     }

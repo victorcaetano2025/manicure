@@ -89,4 +89,9 @@ public class Usuario {
         this.sexo = sexo;
     }
 
+    public Object getId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    }
+
 }
