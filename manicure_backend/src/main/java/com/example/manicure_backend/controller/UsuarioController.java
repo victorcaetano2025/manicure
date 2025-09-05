@@ -1,20 +1,24 @@
 package com.example.manicure_backend.controller;
 
+import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
+import com.example.manicure_backend.repository.UsuarioRepository;
 import com.example.manicure_backend.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 
 @RestController
 @RequestMapping("/usuarios")
 public class UsuarioController {
+
+    private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UsuarioRepository usuarioRepository) {
         this.usuarioService = usuarioService;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping
@@ -45,6 +49,20 @@ public class UsuarioController {
         return usuarioService.buscarPorSexo(sexo);
     }
 
+    @GetMapping("/manicure/{nome}")
+    public List<Usuario> buscarPorNomeManicure(@RequestParam String nome) {
+        return usuarioRepository.findByComplementoIsNotNullAndNomeContainingIgnoreCase(nome);
+    }
+
+    @GetMapping("/manicure/{idade}")
+    public List<Usuario> buscarPorIdadeManicure(@RequestParam int idade) {
+        return usuarioRepository.findByComplementoIsNotNullAndIdade(idade);
+    }
+
+    @GetMapping("/manicure/{sexo}")
+    public List<Usuario> buscarPorSexoManicure(@RequestParam Sexo sexo) {
+        return usuarioRepository.findByComplementoIsNotNullAndSexo(sexo);
+    }
 
     @PostMapping
     public Usuario salvar(@RequestBody Usuario usuario) {
