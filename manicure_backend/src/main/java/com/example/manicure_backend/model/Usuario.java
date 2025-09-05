@@ -6,8 +6,10 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.EnumType;
+import jakarta.persistence.CascadeType;
 
 @Entity
 @Table(name = "usuario")
@@ -16,6 +18,9 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long idUsuario;
+
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
+    private Complementos complemento;
 
     @Column(nullable = false)
     private String nome;
@@ -87,11 +92,6 @@ public class Usuario {
 
     public void setSexo(Sexo sexo) {
         this.sexo = sexo;
-    }
-
-    public Object getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
     }
 
 }

@@ -1,5 +1,6 @@
 package com.example.manicure_backend.service;
 
+import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,24 @@ public class UsuarioService {
 
     public Optional<Usuario> buscarPorId(Long id) {
         return usuarioRepository.findById(id);
+    }
+
+     // 🔹 Novos métodos de busca
+    public List<Usuario> buscarPorNome(String nome) {
+        return usuarioRepository.findByNomeContainingIgnoreCase(nome);
+    }
+
+    public List<Usuario> buscarPorIdade(int idade) {
+        return usuarioRepository.findByIdade(idade);
+    }
+
+    public List<Usuario> buscarPorSexo(String sexo) {
+        try {
+            Sexo enumSexo = Sexo.valueOf(sexo.toUpperCase()); // converte "m" ou "f" em M/F
+            return usuarioRepository.findBySexo(enumSexo);
+        } catch (IllegalArgumentException e) {
+            return List.of(); // retorna lista vazia se o valor não for válido
+        }
     }
 
     public Usuario salvar(Usuario usuario) {

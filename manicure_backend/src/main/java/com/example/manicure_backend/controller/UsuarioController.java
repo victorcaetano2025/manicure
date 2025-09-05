@@ -29,6 +29,23 @@ public class UsuarioController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    //novas buscas por filtro
+    @GetMapping("/nome/{nome}")
+    public List<Usuario> buscarPorNome(@RequestParam String nome) {
+        return usuarioService.buscarPorNome(nome);
+    }
+
+    @GetMapping("/idade/{idade}")
+    public List<Usuario> buscarPorIdade(@RequestParam int idade) {
+        return usuarioService.buscarPorIdade(idade);
+    }
+    
+    @GetMapping("/sexo/{sexo}")
+    public List<Usuario> buscarPorSexo(@PathVariable String sexo) {
+        return usuarioService.buscarPorSexo(sexo);
+    }
+
+
     @PostMapping
     public Usuario salvar(@RequestBody Usuario usuario) {
         return usuarioService.salvar(usuario);
