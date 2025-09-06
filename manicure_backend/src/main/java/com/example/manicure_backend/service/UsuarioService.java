@@ -1,19 +1,49 @@
 package com.example.manicure_backend.service;
 
+import com.example.manicure_backend.DTO.UsuarioDTO;
+import com.example.manicure_backend.model.Complementos;
 import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
+import com.example.manicure_backend.repository.ComplementosRepository;
 import com.example.manicure_backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final ComplementosRepository complementosRepository;
 
-    // Cadastrar
-    public Usuario cadastrar(Usuario usuario) {
-        return usuarioRepository.save(usuario);
+    //cadastrar
+    @Transactional
+    public Usuario criarUsuario(UsuarioDTO dto) {
+        // Cria a entidade Usuario a partir do DTO
+        Usuario novoUsuario = new Usuario();
+        novoUsuario.setNome(dto.getNome());
+        novoUsuario.setIdade(dto.getIdade());
+        novoUsuario.setSenha(dto.getSenha());
+        novoUsuario.setEmail(dto.getEmail());
+        novoUsuario.setUrlFotoPerfil(dto.getUrlFotoPerfil());
+        novoUsuario.setSexo(dto.getSexo());
+
+        // Salva o Usuario primeiro para que ele tenha um ID
+        novoUsuario = usuarioRepository.save(novoUsuario);
+
+        // Se os campos de complemento foram preenchidos, cria e salva o Complementos
+        if (dto.getEspecialidade() != null && dto.getRegiao() != null) {
+            Complementos novoComplemento = new Complementos();
+            novoComplemento.setEspecialidade(dto.getEspecialidade());
+            novoComplemento.setRegiao(dto.getRegiao());
+            novoComplemento.setUsuario(novoUsuario); // Associa o Complemento ao Usuario
+
+            // Graças ao cascade=ALL, o save no usuario ja salva o complemento
+            // mas podemos explicitar o save para maior clareza
+            complementosRepository.save(novoComplemento);
+        }
+
+        return novoUsuario;
     }
 
     // Login simples: email + senha
@@ -22,8 +52,11 @@ public class UsuarioService {
                 .filter(user -> user.getSenha().equals(senha));
     }
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    public UsuarioService(UsuarioRepository usuarioRepository, ComplementosRepository complementosRepository) { // Modifique
+                                                                                                                // o
+                                                                                                                // construtor
         this.usuarioRepository = usuarioRepository;
+        this.complementosRepository = complementosRepository;
     }
 
     public List<Usuario> listarTodos() {
@@ -34,7 +67,7 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-     // 🔹 Novos métodos de busca
+    // 🔹 Novos métodos de busca
     public List<Usuario> buscarPorNome(String nome) {
         return usuarioRepository.findByNomeContainingIgnoreCase(nome);
     }

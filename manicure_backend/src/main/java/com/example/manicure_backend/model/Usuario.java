@@ -94,4 +94,11 @@ public class Usuario {
         this.sexo = sexo;
     }
 
+    public Complementos getComplemento() {
+        return complemento;
+    }
+    public void setComplemento(Complementos complemento) {
+        this.complemento = complemento;
+    }
+
 }

@@ -1,5 +1,7 @@
 package com.example.manicure_backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -21,6 +23,7 @@ public class Complementos {
     @OneToOne
     @MapsId
     @JoinColumn(name = "id_complemento", referencedColumnName = "id_usuario")
+    @JsonIgnore
     private Usuario usuario;
 
     @Column(nullable = false)

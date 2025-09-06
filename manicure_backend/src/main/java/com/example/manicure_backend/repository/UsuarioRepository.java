@@ -3,6 +3,9 @@ package com.example.manicure_backend.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
 
@@ -15,7 +18,12 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     // O Spring Data JPA traduz isso para um INNER JOIN automaticamente.
     List<Usuario> findByComplementoIsNotNull();
     // Lista usuários que têm um complemento e cujo nome contém a string de busca, ignorando maiúsculas e minúsculas
-    List<Usuario> findByComplementoIsNotNullAndNomeContainingIgnoreCase(String nome);
+    // Método para buscar manicures por nome
+    @Query("SELECT u FROM Usuario u JOIN u.complemento c WHERE u.nome LIKE %:nome%")
+    List<Usuario> findManicuresByNome(@Param("nome") String nome);
     List<Usuario> findByComplementoIsNotNullAndIdade(int idade);
     List<Usuario> findByComplementoIsNotNullAndSexo(Sexo sexo);
+    List<Usuario> findByComplementoEspecialidadeContainingIgnoreCase(String especialidade);
+    List<Usuario> findByComplementoRegiaoContainingIgnoreCase(String regiao);
+
 }
