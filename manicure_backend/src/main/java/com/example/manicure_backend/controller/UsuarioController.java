@@ -57,24 +57,24 @@ public class UsuarioController {
         return usuarioRepository.findManicuresByNome(nome);
     }
 
-    @GetMapping("/manicure/{idade}")
-    public List<Usuario> buscarPorIdadeManicure(@RequestParam int idade) {
-        return usuarioRepository.findByComplementoIsNotNullAndIdade(idade);
+    @GetMapping("/manicures/{idade}")
+    public List<Usuario> buscarManicuresPorIdade(@RequestParam int idade) {
+        return usuarioRepository.findManicuresByIdade(idade);
     }
 
-    @GetMapping("/manicure/{sexo}")
-    public List<Usuario> buscarPorSexoManicure(@RequestParam Sexo sexo) {
-        return usuarioRepository.findByComplementoIsNotNullAndSexo(sexo);
+    @GetMapping("/manicures/{sexo}")
+    public List<Usuario> buscarManicuresPorSexo(@RequestParam Sexo sexo) {
+        return usuarioRepository.findManicuresBySexo(sexo);
     }
 
-    @GetMapping("/manicure/{especialidade}")
-    public List<Usuario> buscarPorEspecialidadeManicure(@RequestParam String especialidade) {
-        return usuarioRepository.findByComplementoEspecialidadeContainingIgnoreCase(especialidade);
+    @GetMapping("/manicures/{especialidade}")
+    public List<Usuario> buscarManicuresPorEspecialidade(@RequestParam String especialidade) {
+        return usuarioRepository.findManicuresByEspecialidade(especialidade);
     }
 
     @GetMapping("/manicure/{regiao}")
-    public List<Usuario> buscarPorRegiaoManicure(@RequestParam String regiao) {
-        return usuarioRepository.findByComplementoRegiaoContainingIgnoreCase(regiao);
+    public List<Usuario> buscarManicurePorRegiao(@RequestParam String regiao) {
+        return usuarioRepository.findManicuresByRegiao(regiao);
     }
 
     @PostMapping("/cadastrar")
