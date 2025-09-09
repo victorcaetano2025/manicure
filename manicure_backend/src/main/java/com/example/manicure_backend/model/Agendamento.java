@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 @Entity
 @Table(name = "agendamento")
 public class Agendamento {
@@ -23,9 +25,12 @@ public class Agendamento {
     @Column(columnDefinition = "TEXT")
     private String descricao;
 
+    
     @Column(nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy")
     private LocalDate data;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
     private LocalTime hora;
 
     @Enumerated(EnumType.STRING)

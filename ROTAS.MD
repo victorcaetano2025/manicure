@@ -9,14 +9,14 @@ projeto Java spring boot com maven e postgresSql sendo essa a parte da API onde 
 <br>`http://localhost:8080/agendamentos`
 ## POST
 - ### como fazer um post na tabela usuario<br>
-`{
-  "nome": "noem",
-  "idade": 18,
-  "senha": "12345",
-  "email": "email@email.com",
-  "urlFotoPerfil": "URL para algum ponto",
-  "sexo": "F ou M"
-}`
+`{ "nome": "nome",
+ "idade": 18,
+  "email": "seu_email",
+  "senha": "sua_senha",
+  "urlFotoPerfil": "URL_foto",
+  "sexo": "F" ou "M",
+  "especialidade": "alguma_especialidade",
+  "regiao": "algum_lugar" }`
 - ### como fazer um post na tabela post<br>
 `{
   "titulo": "titulo da postagem",
@@ -34,7 +34,7 @@ projeto Java spring boot com maven e postgresSql sendo essa a parte da API onde 
     "idUsuario": id_do_cliente
   },
   "descricao": "Unha decorada com esmalte vermelho",
-  "data": "yyyy-mm-dd",
+  "data": "dd/mm/yyyy",
   "hora": "hh:mm",
   "status": "AGENDADO" ou "CANCELADO" ou "CONCLUIDO",
   "valor": 00.0
