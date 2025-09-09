@@ -1,5 +1,6 @@
 package com.example.manicure_backend.controller;
 
+import com.example.manicure_backend.DTO.UsuarioDTO;
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,8 @@ public class AuthController {
 
     // Cadastro
     @PostMapping("/register")
-    public ResponseEntity<Usuario> register(@RequestBody Usuario usuario) {
-        Usuario novoUsuario = usuarioService.cadastrar(usuario);
+    public ResponseEntity<Usuario> register(@RequestBody UsuarioDTO usuarioDTO) {
+        Usuario novoUsuario = usuarioService.criarUsuario(usuarioDTO);
         return ResponseEntity.ok(novoUsuario);
     }
 
@@ -33,8 +34,9 @@ public class AuthController {
         return usuarioService.login(email, senha)
                 .map(user -> ResponseEntity.ok(Map.of(
                         "message", "Login bem-sucedido!",
-                        "userId", user.getId(),
-                        "nome", user.getNome()
+                        "userId", user.getIdUsuario(),
+                        "nome", user.getNome(),
+                        "email", user.getEmail()
                 )))
                 .orElse(ResponseEntity.status(401).body(Map.of("error", "Credenciais inválidas")));
     }

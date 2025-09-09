@@ -6,6 +6,7 @@ import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.repository.ComplementosRepository;
 import com.example.manicure_backend.repository.UsuarioRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
@@ -15,48 +16,49 @@ import java.util.Optional;
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final ComplementosRepository complementosRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    //cadastrar
+    public UsuarioService(UsuarioRepository usuarioRepository,
+                          ComplementosRepository complementosRepository) {
+        this.usuarioRepository = usuarioRepository;
+        this.complementosRepository = complementosRepository;
+        this.passwordEncoder = new BCryptPasswordEncoder(); // Inicializa o encoder
+    }
+
+    // Cadastrar usuário com senha criptografada
     @Transactional
     public Usuario criarUsuario(UsuarioDTO dto) {
-        // Cria a entidade Usuario a partir do DTO
         Usuario novoUsuario = new Usuario();
         novoUsuario.setNome(dto.getNome());
         novoUsuario.setIdade(dto.getIdade());
-        novoUsuario.setSenha(dto.getSenha());
         novoUsuario.setEmail(dto.getEmail());
         novoUsuario.setUrlFotoPerfil(dto.getUrlFotoPerfil());
         novoUsuario.setSexo(dto.getSexo());
 
-        // Salva o Usuario primeiro para que ele tenha um ID
+        // Criptografa a senha antes de salvar
+        String senhaCriptografada = passwordEncoder.encode(dto.getSenha());
+        novoUsuario.setSenha(senhaCriptografada);
+
+        // Salva o usuario para gerar o ID
         novoUsuario = usuarioRepository.save(novoUsuario);
 
-        // Se os campos de complemento foram preenchidos, cria e salva o Complementos
+        // Se existir complemento
         if (dto.getEspecialidade() != null && dto.getRegiao() != null) {
             Complementos novoComplemento = new Complementos();
             novoComplemento.setEspecialidade(dto.getEspecialidade());
             novoComplemento.setRegiao(dto.getRegiao());
-            novoComplemento.setUsuario(novoUsuario); // Associa o Complemento ao Usuario
+            novoComplemento.setUsuario(novoUsuario);
 
-            // Graças ao cascade=ALL, o save no usuario ja salva o complemento
-            // mas podemos explicitar o save para maior clareza
             complementosRepository.save(novoComplemento);
         }
 
         return novoUsuario;
     }
 
-    // Login simples: email + senha
+    // Login seguro com verificação de senha criptografada
     public Optional<Usuario> login(String email, String senha) {
         return usuarioRepository.findByEmail(email)
-                .filter(user -> user.getSenha().equals(senha));
-    }
-
-    public UsuarioService(UsuarioRepository usuarioRepository, ComplementosRepository complementosRepository) { // Modifique
-                                                                                                                // o
-                                                                                                                // construtor
-        this.usuarioRepository = usuarioRepository;
-        this.complementosRepository = complementosRepository;
+                .filter(user -> passwordEncoder.matches(senha, user.getSenha()));
     }
 
     public List<Usuario> listarTodos() {
@@ -67,7 +69,6 @@ public class UsuarioService {
         return usuarioRepository.findById(id);
     }
 
-    // 🔹 Novos métodos de busca
     public List<Usuario> buscarPorNome(String nome) {
         return usuarioRepository.findByNomeContainingIgnoreCase(nome);
     }
@@ -78,14 +79,18 @@ public class UsuarioService {
 
     public List<Usuario> buscarPorSexo(String sexo) {
         try {
-            Sexo enumSexo = Sexo.valueOf(sexo.toUpperCase()); // converte "m" ou "f" em M/F
+            Sexo enumSexo = Sexo.valueOf(sexo.toUpperCase());
             return usuarioRepository.findBySexo(enumSexo);
         } catch (IllegalArgumentException e) {
-            return List.of(); // retorna lista vazia se o valor não for válido
+            return List.of();
         }
     }
-
+//metodos CRUD
     public Usuario salvar(Usuario usuario) {
+        // garante que a senha nunca seja salva sem criptografia
+        if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) {
+            usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        }
         return usuarioRepository.save(usuario);
     }
 
@@ -94,7 +99,12 @@ public class UsuarioService {
             usuario.setNome(usuarioAtualizado.getNome());
             usuario.setIdade(usuarioAtualizado.getIdade());
             usuario.setEmail(usuarioAtualizado.getEmail());
-            usuario.setSenha(usuarioAtualizado.getSenha());
+
+            // Criptografa a senha apenas se for alterada
+            if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
+                usuario.setSenha(passwordEncoder.encode(usuarioAtualizado.getSenha()));
+            }
+
             return usuarioRepository.save(usuario);
         });
     }

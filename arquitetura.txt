@@ -9,18 +9,31 @@ meu-projeto/
     │   │           └── projeto/
     │   │               ├── MeuProjetoApplication.java                  # classe principal
     │   │               │
+    │   │               ├── DTO/        # entidadades para transações seguras
+    │   │               │   └── UsuarioDTO.java
+    │   │               │
     │   │               ├── model/       # entidades JPA                # Suas classes @Entity (representam tabelas no banco).
     │   │               │   └── Usuario.java
+    │   │               │   └── Sexo.java
+    │   │               │   └── Complemento.java
+    │   │               │   └── Agendamento.java
+    │   │               │   └── StatusAgendamento.java
     │   │               │   └── Post.java
+    │   │               │
     │   │               ├── repository/  # interfaces JpaRepository     # Interfaces que estendem JpaRepository (CRUD automático).
     │   │               │   └── UsuarioRepository.java
     │   │               │   └── postRepository.java
+    │   │               │
     │   │               ├── service/     # regras de negócio            # Classes de lógica de negócio, anotadas com @Service.
     │   │               │   └── UsuarioService.java
+    │   │               │   └── AgendamentoService.java
     │   │               │   └── PostService.java
+    │   │               │
     │   │               └── controller/  # APIs REST                    # Classes @RestController que expõem endpoints da API.
+    │   │                   └── AuthController.java
     │   │                   └── UsuarioController.java
     │   │                   └── PostController.java
+    │   │                   └── AgendamentoController.java
     │   └── resources/
     │       ├── application.properties   # configs (DB, porta, etc)
     │       ├── static/                  # arquivos estáticos (css, js, imgs)
