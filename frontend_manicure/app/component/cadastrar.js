@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from 'react';
 
 export default function Cadastrar() {
@@ -34,7 +36,7 @@ export default function Cadastrar() {
 
         <h3>Email</h3>
         <input
-          type="text"
+          type="email"
           id="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -75,4 +77,3 @@ export default function Cadastrar() {
     </div>
   );
 }
-
