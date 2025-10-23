@@ -76,7 +76,7 @@ public class UsuarioController {
     public List<Usuario> buscarManicurePorRegiao(@RequestParam String regiao) {
         return usuarioRepository.findManicuresByRegiao(regiao);
     }
-
+//remover o parênteses para ser um post no /usuario
     @PostMapping("/cadastrar")
     public ResponseEntity<Usuario> cadastrarUsuario(@RequestBody UsuarioDTO usuarioDto) {
         Usuario novoUsuario = usuarioService.criarUsuario(usuarioDto);
