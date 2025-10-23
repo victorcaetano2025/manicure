@@ -18,7 +18,7 @@ public class AuthController {
         this.usuarioService = usuarioService;
     }
 
-    // Cadastro
+    // Cadastro remover pois e farei usuário post
     @PostMapping("/register")
     public ResponseEntity<Usuario> register(@RequestBody UsuarioDTO usuarioDTO) {
         Usuario novoUsuario = usuarioService.criarUsuario(usuarioDTO);
