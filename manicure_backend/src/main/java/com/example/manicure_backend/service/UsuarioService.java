@@ -19,7 +19,7 @@ public class UsuarioService {
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
-                          ComplementosRepository complementosRepository) {
+            ComplementosRepository complementosRepository) {
         this.usuarioRepository = usuarioRepository;
         this.complementosRepository = complementosRepository;
         this.passwordEncoder = new BCryptPasswordEncoder(); // Inicializa o encoder
@@ -85,7 +85,8 @@ public class UsuarioService {
             return List.of();
         }
     }
-//metodos CRUD
+
+    // metodos CRUD
     public Usuario salvar(Usuario usuario) {
         // garante que a senha nunca seja salva sem criptografia
         if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) {
