@@ -10,25 +10,24 @@ function FriendItem({ friend }) {
     
     const handleClick = () => {
         navigate(`/friend/${friend.id , { state: { friend } } );
-        };
 
         return (
         <div
         
-        onCLick={handleClick})
+        onClick={handleClick}
         style={{
         border: "1px solid #ccc",
         padding: "10px",
         borderRadius: "8px",
         display: "flex",
         alignItems:"center",
-        gap: "10" px,
+        gap: "10px",
         cursor: "pointer",
         transition: "background 0.3s",
         }}
         onMouseOver={(e) => (e.curretTarget.style.bakcground = #f9f9f9 )}
-        onMOuseOut={(e) => (e.currenrTarget.style.backgorund = "white")}
+        onMouseOut={(e) => (e.currenrTarget.style.backgorund = "white")}
         >
         <img
-        }
+        src
     
