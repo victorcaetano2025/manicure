@@ -6,6 +6,10 @@ import com.example.manicure_backend.model.Sexo;
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.repository.ComplementosRepository;
 import com.example.manicure_backend.repository.UsuarioRepository;
+import com.example.manicure_backend.security.CustomUserDetails;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,19 +17,28 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class UsuarioService {
+public class UsuarioService implements UserDetailsService {
+
     private final UsuarioRepository usuarioRepository;
     private final ComplementosRepository complementosRepository;
     private final BCryptPasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
-            ComplementosRepository complementosRepository) {
+                          ComplementosRepository complementosRepository) {
         this.usuarioRepository = usuarioRepository;
         this.complementosRepository = complementosRepository;
-        this.passwordEncoder = new BCryptPasswordEncoder(); // Inicializa o encoder
+        this.passwordEncoder = new BCryptPasswordEncoder();
     }
 
-    // Cadastrar usuário com senha criptografada
+    // 🔒 Implementação necessária para o Spring Security
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
+        return new CustomUserDetails(usuario);
+    }
+
+    // ✅ Cadastro com senha criptografada (mantido igual)
     @Transactional
     public Usuario criarUsuario(UsuarioDTO dto) {
         Usuario novoUsuario = new Usuario();
@@ -39,7 +52,7 @@ public class UsuarioService {
         String senhaCriptografada = passwordEncoder.encode(dto.getSenha());
         novoUsuario.setSenha(senhaCriptografada);
 
-        // Salva o usuario para gerar o ID
+        // Salva o usuário para gerar o ID
         novoUsuario = usuarioRepository.save(novoUsuario);
 
         // Se existir complemento
@@ -55,7 +68,7 @@ public class UsuarioService {
         return novoUsuario;
     }
 
-    // Login seguro com verificação de senha criptografada
+    // 🔐 Login compatível com senha criptografada (mantido)
     public Optional<Usuario> login(String email, String senha) {
         return usuarioRepository.findByEmail(email)
                 .filter(user -> passwordEncoder.matches(senha, user.getSenha()));
@@ -86,9 +99,8 @@ public class UsuarioService {
         }
     }
 
-    // metodos CRUD
+    // CRUD
     public Usuario salvar(Usuario usuario) {
-        // garante que a senha nunca seja salva sem criptografia
         if (usuario.getSenha() != null && !usuario.getSenha().startsWith("$2a$")) {
             usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
         }
@@ -101,7 +113,6 @@ public class UsuarioService {
             usuario.setIdade(usuarioAtualizado.getIdade());
             usuario.setEmail(usuarioAtualizado.getEmail());
 
-            // Criptografa a senha apenas se for alterada
             if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
                 usuario.setSenha(passwordEncoder.encode(usuarioAtualizado.getSenha()));
             }

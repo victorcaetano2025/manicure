@@ -8,7 +8,7 @@ export default function Home() {
     <div>
       <header>
         <Link href="/pages/auth">authenticação</Link>
-      </header>
+      <header/>
       <Post
         title="pintei o simbolo do Xbox"
         content="foto da unha pintada de Xbox"

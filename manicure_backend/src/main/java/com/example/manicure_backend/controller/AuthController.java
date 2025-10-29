@@ -1,9 +1,14 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.DTO.UsuarioDTO;
+import com.example.manicure_backend.dto.LoginRequest;
+import com.example.manicure_backend.dto.RegisterRequest;
 import com.example.manicure_backend.model.Usuario;
+import com.example.manicure_backend.security.JwtUtil;
 import com.example.manicure_backend.service.UsuarioService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -12,32 +17,44 @@ import java.util.Map;
 @RequestMapping("/auth")
 public class AuthController {
 
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
     private final UsuarioService usuarioService;
 
-    public AuthController(UsuarioService usuarioService) {
+    public AuthController(AuthenticationManager authenticationManager, JwtUtil jwtUtil, UsuarioService usuarioService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
         this.usuarioService = usuarioService;
     }
 
-    // Cadastro remover pois e farei usuário post
-    @PostMapping("/register")
-    public ResponseEntity<Usuario> register(@RequestBody UsuarioDTO usuarioDTO) {
-        Usuario novoUsuario = usuarioService.criarUsuario(usuarioDTO);
-        return ResponseEntity.ok(novoUsuario);
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+        try {
+            var authToken = new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getSenha());
+            authenticationManager.authenticate(authToken);
+
+            String token = jwtUtil.generateToken(loginRequest.getEmail());
+
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (AuthenticationException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Credenciais inválidas"));
+        }
     }
 
-    // Login
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        String senha = body.get("senha");
+    // opcional: expor rota de cadastro aqui também; você mencionou /usuarios/cadastrar — deixei abaixo outro endpoint exemplo
+    @PostMapping("/register")
+    public ResponseEntity<?> register(@RequestBody RegisterRequest registerRequest) {
+        try {
+            Usuario u = new Usuario();
+            u.setNome(registerRequest.getNome());
+            u.setEmail(registerRequest.getEmail());
+            u.setSenha(registerRequest.getSenha());
 
-        return usuarioService.login(email, senha)
-                .map(user -> ResponseEntity.ok(Map.of(
-                        "message", "Login bem-sucedido!",
-                        "userId", user.getIdUsuario(),
-                        "nome", user.getNome(),
-                        "email", user.getEmail()
-                )))
-                .orElse(ResponseEntity.status(401).body(Map.of("error", "Credenciais inválidas")));
+            Usuario saved = usuarioService.register(u);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+        }
     }
 }
