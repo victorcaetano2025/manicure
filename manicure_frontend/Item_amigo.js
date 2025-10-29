@@ -1,5 +1,5 @@
 import React from "react";
-import { UseNavigate } from"react-router-dom";
+import { useNavigate } from"react-router-dom";
 
 function FriendItem({ friend }) {
     const navigate = useNavigate();
@@ -9,7 +9,7 @@ function FriendItem({ friend }) {
     }
     
     const handleClick = () => {
-        navigate(`/friend/${friend.id , { state: { friend } } } );
+        navigate(`/friend/${friend.id , { state: { friend } } );
         };
 
         return (
