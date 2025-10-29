@@ -101,4 +101,8 @@ public class Usuario {
         this.complemento = complemento;
     }
 
+    public Long getId() {
+        return idUsuario;
+    }
+
 }
