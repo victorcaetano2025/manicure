@@ -26,6 +26,9 @@ function FriendItem({ friend }) {
         cursor: "pointer",
         transition: "background 0.3s",
         }}
-        onMouseOver={(e => )}
-        }}
-    }
+        onMouseOver={(e) => (e.curretTarget.style.bakcground = #f9f9f9 )}
+        onMOuseOut={(e) => (e.currenrTarget.style.backgorund = "white")}
+        >
+        <img
+        }
+    
