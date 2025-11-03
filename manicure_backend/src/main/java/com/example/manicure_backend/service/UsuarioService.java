@@ -9,7 +9,7 @@ import com.example.manicure_backend.repository.UsuarioRepository;
 import com.example.manicure_backend.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,7 +22,10 @@ public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
     private final ComplementosRepository complementosRepository;
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
+    // 💡 CORREÇÃO: O passwordEncoder é agora INJETADO, não criado localmente!
+    // Ele será o mesmo Bean que você configurou no SecurityConfig.
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -43,7 +46,7 @@ public class UsuarioService implements UserDetailsService {
                 .idade(dto.getIdade())
                 .sexo(dto.getSexo())
                 .urlFotoPerfil(dto.getUrlFotoPerfil())
-                .senha(passwordEncoder.encode(dto.getSenha()))
+                .senha(passwordEncoder.encode(dto.getSenha())) // Usa o encoder injetado
                 .build();
 
         usuario = usuarioRepository.save(usuario);
@@ -63,7 +66,7 @@ public class UsuarioService implements UserDetailsService {
 
     public Optional<Usuario> login(String email, String senha) {
         return usuarioRepository.findByEmail(email)
-                .filter(user -> passwordEncoder.matches(senha, user.getSenha()));
+                .filter(user -> passwordEncoder.matches(senha, user.getSenha())); // Usa o encoder injetado
     }
 
     public List<Usuario> listarTodos() {
@@ -85,8 +88,11 @@ public class UsuarioService implements UserDetailsService {
                 usuario.setEmail(dto.getEmail());
             if (dto.getIdade() != null)
                 usuario.setIdade(dto.getIdade());
+            
+            // Criptografa a nova senha, se houver
             if (dto.getSenha() != null && !dto.getSenha().isBlank())
-                usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+                usuario.setSenha(passwordEncoder.encode(dto.getSenha())); 
+                
             if (dto.getSexo() != null)
                 usuario.setSexo(dto.getSexo());
             if (dto.getUrlFotoPerfil() != null)
@@ -118,5 +124,4 @@ public class UsuarioService implements UserDetailsService {
             return List.of(); // retorna lista vazia se o valor for inválido
         }
     }
-
 }

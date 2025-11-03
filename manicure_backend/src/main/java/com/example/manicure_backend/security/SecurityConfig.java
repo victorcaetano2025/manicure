@@ -17,15 +17,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter; // nosso filtro JWT
-
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    // ✅ INJEÇÃO CORRETA: O filtro é injetado como um PARÂMETRO do método @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http.csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**").permitAll() // login e register públicos
-                .anyRequest().authenticated()           // resto precisa de token
+                .requestMatchers("/auth/**", "/h2-console/**").permitAll() // Adicione /h2-console
+                .anyRequest().authenticated()
             )
+            // ✅ Usa o parâmetro injetado
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -41,16 +41,29 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
+/*
     @Bean
-public WebMvcConfigurer corsConfigurer() {
-    return new WebMvcConfigurer() {
-        @Override
-        public void addCorsMappings(CorsRegistry registry) {
-            registry.addMapping("/**")
-                    .allowedOrigins("http://localhost:5500") // ou "*"
-                    .allowedMethods("*");
-        }
-    };
-}
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5500") // ou "*"
+                        .allowedMethods("*");
+            }
+        };
+    }
+ */
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                        .allowedOrigins("*") // ✅ Permite todas as origens para testes
+                        .allowedMethods("*")
+                        .allowedHeaders("*"); // Adicione allowedHeaders para garantir que o Authorization: Bearer passe
+            }
+        };
+    }
 }
