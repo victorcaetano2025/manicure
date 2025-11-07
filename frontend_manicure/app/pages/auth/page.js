@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Login from "../../component/login";
-import Cadastrar from "../../component/cadastrar";
+import Login from "../../component/auth/Login";
+import Cadastrar from "../../component/auth/Cadastrar";
 
 export default function AuthPage() {
   const [modo, setModo] = useState("login"); // alterna entre login e cadastro

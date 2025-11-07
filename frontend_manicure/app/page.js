@@ -1,14 +1,14 @@
 // pagina Home onde tudo inicia
 import Link from 'next/link';
-import Feed from './component/Feed';
-import Post from './component/Post';
+import Feed from './component/post/Feed';
+import Post from './component/post/Post';
 
 export default function Home() {
   return (
     <div>
       <header>
         <Link href="/pages/auth">authenticação</Link>
-      <header/>
+      </header>
       <Post
         title="pintei o simbolo do Xbox"
         content="foto da unha pintada de Xbox"
