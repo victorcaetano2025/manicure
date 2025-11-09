@@ -17,8 +17,7 @@ public class Complementos {
     private Long idComplemento;
 
     @OneToOne
-    @MapsId
-    @JoinColumn(name = "id_complemento", referencedColumnName = "id")
+    @JoinColumn(name = "id_usuario") // FK apontando para a tabela usuario
     @JsonIgnore
     private Usuario usuario;
 

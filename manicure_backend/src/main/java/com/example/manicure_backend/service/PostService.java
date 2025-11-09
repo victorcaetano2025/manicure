@@ -1,8 +1,8 @@
 package com.example.manicure_backend.service;
 
+import com.example.manicure_backend.model.Complementos;
 import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.model.Usuario;
-import com.example.manicure_backend.model.Complementos;
 import com.example.manicure_backend.repository.PostRepository;
 import com.example.manicure_backend.repository.UsuarioRepository;
 import com.example.manicure_backend.security.JwtUtil;
@@ -15,8 +15,8 @@ import java.util.Optional;
 public class PostService {
 
     private final PostRepository postRepository;
-    private final UsuarioRepository usuarioRepository; // Para buscar o usuário pelo email extraído do token
-    private final JwtUtil jwtUtil; // Para extrair email do token JWT
+    private final UsuarioRepository usuarioRepository;
+    private final JwtUtil jwtUtil;
 
     public PostService(PostRepository postRepository, UsuarioRepository usuarioRepository, JwtUtil jwtUtil) {
         this.postRepository = postRepository;
@@ -34,42 +34,66 @@ public class PostService {
         return postRepository.findById(id);
     }
 
-    // 🔹 Salvar post com validação do token
+    // 🔹 Criar post (somente usuário com complemento)
     public Post salvar(Post post, String token) {
-
-        // 1️⃣ Extrai email do token
         String email = jwtUtil.extractEmail(token);
 
-        // 2️⃣ Busca usuário pelo email
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 
-        // 3️⃣ Verifica se o usuário tem complemento
         Complementos complemento = usuario.getComplemento();
         if (complemento == null) {
-            // Se não tiver, não pode criar post
             throw new RuntimeException("Usuário não tem permissão para criar post");
         }
 
-        // 4️⃣ Define o autor do post como o usuário que fez login
         post.setAuthor(usuario);
-
-        // 5️⃣ Salva o post
         return postRepository.save(post);
     }
 
-    // 🔹 Atualizar post
-    public Optional<Post> atualizar(Long id, Post postAtualizado) {
-        return postRepository.findById(id).map(post -> {
-            post.setTitulo(postAtualizado.getTitulo());
-            post.setDescricao(postAtualizado.getDescricao());
-            post.setAuthor(postAtualizado.getAuthor()); // Pode manter o mesmo autor
-            return postRepository.save(post);
-        });
+    // 🔹 Atualizar post com validação de token
+public Post atualizar(Long id, Post postAtualizado, String token) {
+
+    // 1️⃣ Extrai email do token (se enviado)
+    if (token == null || token.isEmpty()) {
+        throw new RuntimeException("Token JWT não informado");
     }
 
-    // 🔹 Deletar post por ID
-    public void deletar(Long id) {
-        postRepository.deleteById(id);
+    String email = jwtUtil.extractEmail(token);
+
+    // 2️⃣ Busca o usuário pelo email
+    Usuario usuario = usuarioRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+    // 3️⃣ Busca o post existente
+    Post postExistente = postRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+
+    // 4️⃣ Verifica se o autor do post é o mesmo do token
+    if (!postExistente.getAuthor().getIdUsuario().equals(usuario.getIdUsuario())) {
+        throw new RuntimeException("Você não tem permissão para atualizar este post");
+    }
+
+    // 5️⃣ Atualiza apenas os campos permitidos
+    postExistente.setTitulo(postAtualizado.getTitulo());
+    postExistente.setDescricao(postAtualizado.getDescricao());
+    postExistente.setData(postAtualizado.getData());
+
+    // 6️⃣ Salva e retorna o post atualizado
+    return postRepository.save(postExistente);
+}
+
+    // 🔹 Deletar post (somente o autor pode deletar)
+    public void deletar(Long id, String token) {
+        String email = (token != null) ? jwtUtil.extractEmail(token) : null;
+
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+
+        // ✅ Verifica se o usuário do token é o autor
+        if (email == null || !post.getAuthor().getEmail().equals(email)) {
+            throw new RuntimeException("Usuário não autorizado para deletar este post");
+        }
+
+        postRepository.delete(post);
     }
 }

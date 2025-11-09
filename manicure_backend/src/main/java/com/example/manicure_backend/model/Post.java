@@ -1,10 +1,16 @@
 package com.example.manicure_backend.model;
 
 import jakarta.persistence.*;
-import java.time.LocalDate; //localDate para somente datas
+import lombok.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "post")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Post {
 
     @Id
@@ -18,53 +24,11 @@ public class Post {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    //A data ja esta convertida no padrao BR pelo arquivo do application.properties
+    // Data do post (LocalDate evita precisar de horário)
     @Column(name = "data_post", nullable = false)
-    private LocalDate data; 
+    private LocalDate data;
 
-    @ManyToOne
-    @JoinColumn(name = "id_author", nullable = false) // chave estrangeira
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_author", nullable = false)
     private Usuario author;
-
-    // Getters e Setters
-    public Long getIdPost() {
-        return idPost;
-    }
-
-    public void setIdPost(Long idPost) {
-        this.idPost = idPost;
-    }
-
-    public String getTitulo() {
-        return titulo;
-    }
-
-    public void setTitulo(String titulo) {
-        this.titulo = titulo;
-    }
-
-    public String getDescricao() {
-        return descricao;
-    }
-
-    public void setDescricao(String descricao) {
-        this.descricao = descricao;
-    }
-
-    public Usuario getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(Usuario author) {
-        this.author = author;
-    }
-
-    public LocalDate getData() {
-        return data;
-    }
-
-    public void setData(LocalDate data) {
-        this.data = data;
-    }
-
 }

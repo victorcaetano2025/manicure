@@ -1,23 +1,24 @@
 package com.example.manicure_backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
 @Table(name = "usuario")
-@Data                   // Gera automaticamente getters, setters, equals, hashCode e toString
-@NoArgsConstructor       // Construtor vazio
-@AllArgsConstructor      // Construtor com todos os campos
-@Builder                 // Facilita a criação de objetos com o padrão builder
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_usuario")
     private Long idUsuario;
 
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL)
-    @JsonIgnore // Evita recursão infinita ao converter para JSON (Usuario → Complemento → Usuario)
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference // evita loop recursivo (o lado "pai" da relação)
     private Complementos complemento;
 
     @Column(nullable = false)
@@ -25,10 +26,13 @@ public class Usuario {
 
     private Integer idade;
 
+    @Column(nullable = false)
     private String senha;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
+    @Column(name = "url_foto_perfil")
     private String urlFotoPerfil;
 
     @Enumerated(EnumType.STRING)
