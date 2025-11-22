@@ -20,16 +20,36 @@ export default function Login() {
 
     setLoading(true);
 
-    // Simulação de envio pro backend
-    setTimeout(() => {
-      setLoading(false);
-      setSuccess(true);
+    try {
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, senha }),
+      });
 
-      // Simula o redirecionamento pra /home depois do "Carregando..."
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.erro || "Falha ao fazer login");
+      }
+
+      // Salva token e dados do usuário
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("usuario", JSON.stringify(data.usuario));
+
+      setSuccess(true);
+      setLoading(false);
+
+      // Redireciona após login
       setTimeout(() => {
         window.location.href = "/";
       }, 1500);
-    }, 1000);
+    } catch (err) {
+      setError(err.message);
+      setLoading(false);
+    }
   }
 
   function handleCriarConta() {
@@ -68,14 +88,12 @@ export default function Login() {
 
           {error && <p style={{ color: "red" }}>{error}</p>}
 
-          {/* Botão Entrar */}
           <div style={{ marginBottom: "20px" }}>
             <button type="submit" disabled={loading} style={{ padding: "10px 20px" }}>
               {loading ? "Entrando..." : "Entrar"}
             </button>
           </div>
 
-          {/* Botões empilhados */}
           <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
             <button type="button" onClick={handleCriarConta}>
               Criar nova conta

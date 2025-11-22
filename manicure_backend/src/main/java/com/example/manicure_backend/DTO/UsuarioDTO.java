@@ -6,13 +6,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data                   // Gera getters, setters, equals, hashCode e toString
-@Builder                // Permite criar objetos com builder pattern
-@NoArgsConstructor      // Construtor vazio
-@AllArgsConstructor     // Construtor com todos os argumentos
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class UsuarioDTO {
 
-    // 🔹 Campos do Usuario
+    // 🔹 Dados principais do usuário
     private String nome;
     private Integer idade;
     private String senha;
@@ -20,7 +20,7 @@ public class UsuarioDTO {
     private String urlFotoPerfil;
     private Sexo sexo;
 
-    // 🔹 Campos opcionais (Complementos)
+    // 🔹 Dados opcionais — complementos
     private String especialidade;
     private String regiao;
 }

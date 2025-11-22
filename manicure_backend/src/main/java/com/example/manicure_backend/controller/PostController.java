@@ -6,12 +6,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/posts")
+@CrossOrigin(origins = "*") // permite testes via Postman / front-end
 public class PostController {
 
     private final PostService postService;
@@ -20,11 +18,13 @@ public class PostController {
         this.postService = postService;
     }
 
+    // 🔹 Listar todos os posts (não requer token)
     @GetMapping
     public List<Post> listarTodos() {
         return postService.listarTodos();
     }
 
+    // 🔹 Buscar post por ID (não requer token)
     @GetMapping("/{id}")
     public ResponseEntity<Post> buscarPorId(@PathVariable Long id) {
         return postService.buscarPorId(id)
@@ -32,22 +32,49 @@ public class PostController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // 🔹 Criar post (requer token JWT)
     @PostMapping
-    public Post salvar(@RequestBody Post post) {
-        return postService.salvar(post);
+    public ResponseEntity<?> criarPost(
+            @RequestBody Post post,
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            Post salvo = postService.salvar(post, token);
+            return ResponseEntity.ok(salvo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 
-    // 🔹 PUT para atualizar
+    // 🔹 Atualizar post (opcional: validar autor via token)
     @PutMapping("/{id}")
-    public ResponseEntity<Post> atualizar(@PathVariable Long id, @RequestBody Post post) {
-        return postService.atualizar(id, post)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<?> atualizar(
+            @PathVariable Long id,
+            @RequestBody Post post,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        try {
+            String token = (authHeader != null) ? authHeader.replace("Bearer ", "") : null;
+            Post atualizado = postService.atualizar(id, post, token);
+            return ResponseEntity.ok(atualizado);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 
+    // 🔹 Deletar post (opcional: validar autor via token)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletar(@PathVariable Long id) {
-        postService.deletar(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deletar(
+            @PathVariable Long id,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        try {
+            String token = (authHeader != null) ? authHeader.replace("Bearer ", "") : null;
+            postService.deletar(id, token);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).body(e.getMessage());
+        }
     }
 }
