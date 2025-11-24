@@ -42,5 +42,3 @@ function FriendItem({ friend }) {
 }
 
 export default FriendItem;
-
-    
