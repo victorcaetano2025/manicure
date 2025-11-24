@@ -29,7 +29,7 @@ export default function Home() {
 
   const irPara = () => {
     // 3. Use router.push() para mudar a rota
-    router.push('/createposts');
+    router.push('/posts');
   };
 
   return (

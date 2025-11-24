@@ -77,4 +77,18 @@ public class PostController {
             return ResponseEntity.status(403).body(e.getMessage());
         }
     }
+
+    @GetMapping("/my")
+    public ResponseEntity<List<PostDTO>> listarMeusPosts(
+            @RequestHeader("Authorization") String authHeader
+    ) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            List<PostDTO> meusPosts = postService.listarPostsPorUsuarioLogado(token);
+            return ResponseEntity.ok(meusPosts);
+        } catch (RuntimeException e) {
+            // Se o token for inválido, expirado ou não fornecido
+            return ResponseEntity.status(401).body(null); 
+        }
+    }
 }

@@ -1,11 +1,23 @@
 package com.example.manicure_backend.model;
-
-import jakarta.persistence.*;
-import lombok.*;
+// ... imports
 
 import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "post")
@@ -26,7 +38,10 @@ public class Post {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    // Data do post (LocalDate evita precisar de horário)
+    // 💡 NOVO CAMPO: URL DA IMAGEM
+    @Column(name = "url_imagem") // Nullable, caso a imagem não seja obrigatória
+    private String urlImagem; 
+    
     @CreationTimestamp
     @Column(name = "data_post", nullable = false)
     private LocalDate data;

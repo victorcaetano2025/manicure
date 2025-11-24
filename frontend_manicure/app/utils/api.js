@@ -1,5 +1,7 @@
 const API_URL = "http://localhost:8080";
 
+// --- Funções de Autenticação e Configuração ---
+
 // Pegar token do localStorage
 export function getToken() {
   if (typeof window !== "undefined") {
@@ -37,8 +39,8 @@ export async function apiFetch(path, options = {}) {
     let errorMessage = res.statusText;
     if (contentType?.includes("application/json")) {
       const errorJson = await res.json();
-      // Ajuste na lógica de erro para pegar a mensagem de erro da API
-      errorMessage = errorJson.erro || JSON.stringify(errorJson);
+      // Tentativa de pegar a mensagem de erro da API, se existir
+      errorMessage = errorJson.message || errorJson.erro || JSON.stringify(errorJson);
     } else {
       const text = await res.text();
       if (text) errorMessage = text;
@@ -50,16 +52,15 @@ export async function apiFetch(path, options = {}) {
   return res.json();
 }
 
-// 🚀 REGISTRO CORRIGIDO: Aceita o objeto de dados completo (userData)
+// --- Funções de Autenticação ---
+
 export async function apiRegister(userData) {
   return apiFetch("/auth/register", {
     method: "POST",
-    // Envia o objeto JSON COMPLETO criado no componente Cadastrar.jsx
-    body: JSON.stringify(userData), 
+    body: JSON.stringify(userData),
   });
 }
 
-// Login
 export async function apiLogin({ email, senha }) {
   const data = await apiFetch("/auth/login", {
     method: "POST",
@@ -70,21 +71,48 @@ export async function apiLogin({ email, senha }) {
   return data;
 }
 
-// Buscar posts
-export async function apiGetPosts() {
-  return apiFetch("/posts");
-}
-
 // Buscar usuário logado
 export async function apiGetUser() {
   return apiFetch("/user/me");
 }
 
-// Criar novo post
+// --- Funções de Posts (CRUD) ---
+
+// 1. 📖 Buscar todos os posts (Feed Geral)
+export async function apiGetPosts() {
+  return apiFetch("/posts", {
+    // Não precisa de token para o feed geral, mas o apiFetch envia se existir.
+    headers: {}, 
+  }); 
+}
+
+// 2. 📝 Criar novo post
 export async function apiCreatePost({ titulo, descricao, urlImagem }) {
   // O apiFetch adicionará o token JWT automaticamente
-  return apiFetch("/posts", { 
+  return apiFetch("/posts", {
     method: "POST",
     body: JSON.stringify({ titulo, descricao, urlImagem }),
+  });
+} 
+
+// 3. 👤 Buscar posts do usuário logado (MyFeed)
+export async function apiGetMyPosts() {
+  // O apiFetch enviará o JWT para o endpoint /posts/my
+  return apiFetch("/posts/my");
+}
+
+// 4. ✏️ Editar um post
+export async function apiUpdatePost(postId, { titulo, descricao, urlImagem }) {
+  return apiFetch(`/posts/${postId}`, {
+    method: "PUT",
+    // Enviamos o post atualizado, incluindo a urlImagem
+    body: JSON.stringify({ titulo, descricao, urlImagem }), 
+  });
+}
+
+// 5. 🗑️ Deletar um post
+export async function apiDeletePost(postId) {
+  return apiFetch(`/posts/${postId}`, {
+    method: "DELETE",
   });
 }
