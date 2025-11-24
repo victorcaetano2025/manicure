@@ -1,5 +1,6 @@
 package com.example.manicure_backend.controller;
 
+import com.example.manicure_backend.dto.PostDTO;
 import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.service.PostService;
 import org.springframework.http.ResponseEntity;
@@ -9,7 +10,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/posts")
-@CrossOrigin(origins = "*") // permite testes via Postman / front-end
 public class PostController {
 
     private final PostService postService;
@@ -18,21 +18,21 @@ public class PostController {
         this.postService = postService;
     }
 
-    // 🔹 Listar todos os posts (não requer token)
+    // 🔹 Listar todos os posts (DTO)
     @GetMapping
-    public List<Post> listarTodos() {
-        return postService.listarTodos();
+    public ResponseEntity<List<PostDTO>> listarTodos() {
+        return ResponseEntity.ok(postService.listarTodosDTO());
     }
 
-    // 🔹 Buscar post por ID (não requer token)
+    // 🔹 Buscar post por ID (DTO)
     @GetMapping("/{id}")
-    public ResponseEntity<Post> buscarPorId(@PathVariable Long id) {
-        return postService.buscarPorId(id)
+    public ResponseEntity<PostDTO> buscarPorId(@PathVariable Long id) {
+        return postService.buscarPorIdDTO(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 🔹 Criar post (requer token JWT)
+    // 🔹 Criar post
     @PostMapping
     public ResponseEntity<?> criarPost(
             @RequestBody Post post,
@@ -47,7 +47,7 @@ public class PostController {
         }
     }
 
-    // 🔹 Atualizar post (opcional: validar autor via token)
+    // 🔹 Atualizar post
     @PutMapping("/{id}")
     public ResponseEntity<?> atualizar(
             @PathVariable Long id,
@@ -63,7 +63,7 @@ public class PostController {
         }
     }
 
-    // 🔹 Deletar post (opcional: validar autor via token)
+    // 🔹 Deletar post
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deletar(
             @PathVariable Long id,

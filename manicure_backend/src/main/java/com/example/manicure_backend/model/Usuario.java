@@ -37,5 +37,6 @@ public class Usuario {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Sexo sexo;
+    @Builder.Default
+    private Sexo sexo = Sexo.F;
 }

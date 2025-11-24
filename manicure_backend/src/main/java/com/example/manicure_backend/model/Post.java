@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import org.hibernate.annotations.CreationTimestamp;
+
 @Entity
 @Table(name = "post")
 @Data
@@ -25,6 +27,7 @@ public class Post {
     private String descricao;
 
     // Data do post (LocalDate evita precisar de horário)
+    @CreationTimestamp
     @Column(name = "data_post", nullable = false)
     private LocalDate data;
 

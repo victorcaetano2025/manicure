@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #gray;
 }
 
 @theme inline {
@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #dark-gray;
+    --foreground: #black;
   }
 }
 
@@ -25,6 +25,4 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-input {
-  background-color: green;
-}
+

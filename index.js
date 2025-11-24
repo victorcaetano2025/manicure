@@ -1,7 +1,7 @@
 fetch("http://localhost:8080/usuarios", {
   method: "GET",
   headers: {
-    "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXJpYUBnbWFpbC5jb20iLCJpYXQiOjE3NjIxOTc5ODYsImV4cCI6MTc2MjIwMTU4Nn0._BChjpca1-4pjPLf-MvzV3pgB14qvs9kdWcowlh7IhI",
+    "Authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJtYXJpYUB0ZXN0ZS5jb20iLCJpYXQiOjE3NjM5MzA0MTgsImV4cCI6MTc2MzkzNDAxOH0.hjFdunzzkJIhYtLB6n6jGf9YEjDB_D_f-E15zl9XFLo",
     "Content-Type": "application/json"
   }
 })

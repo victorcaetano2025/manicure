@@ -1,5 +1,6 @@
 package com.example.manicure_backend.service;
 
+import com.example.manicure_backend.dto.PostDTO;
 import com.example.manicure_backend.model.Complementos;
 import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.model.Usuario;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class PostService {
@@ -24,17 +26,32 @@ public class PostService {
         this.jwtUtil = jwtUtil;
     }
 
-    // 🔹 Listar todos os posts
-    public List<Post> listarTodos() {
-        return postRepository.findAll();
+    // 🔹 Listar todos os posts (DTO)
+    public List<PostDTO> listarTodosDTO() {
+        return postRepository.findAll().stream()
+                .map(p -> new PostDTO(
+                        p.getIdPost(),
+                        p.getTitulo(),
+                        p.getDescricao(),
+                        p.getData(),
+                        p.getAuthor().getNome()
+                ))
+                .collect(Collectors.toList());
     }
 
     // 🔹 Buscar post por ID
-    public Optional<Post> buscarPorId(Long id) {
-        return postRepository.findById(id);
+    public Optional<PostDTO> buscarPorIdDTO(Long id) {
+        return postRepository.findById(id)
+                .map(p -> new PostDTO(
+                        p.getIdPost(),
+                        p.getTitulo(),
+                        p.getDescricao(),
+                        p.getData(),
+                        p.getAuthor().getNome()
+                ));
     }
 
-    // 🔹 Criar post (somente usuário com complemento)
+    // 🔹 Criar post (somente usuários com complementos)
     public Post salvar(Post post, String token) {
         String email = jwtUtil.extractEmail(token);
 
@@ -50,46 +67,38 @@ public class PostService {
         return postRepository.save(post);
     }
 
-    // 🔹 Atualizar post com validação de token
-public Post atualizar(Long id, Post postAtualizado, String token) {
+    // 🔹 Atualizar post
+    public Post atualizar(Long id, Post postAtualizado, String token) {
+        if (token == null || token.isEmpty()) {
+            throw new RuntimeException("Token JWT não informado");
+        }
 
-    // 1️⃣ Extrai email do token (se enviado)
-    if (token == null || token.isEmpty()) {
-        throw new RuntimeException("Token JWT não informado");
+        String email = jwtUtil.extractEmail(token);
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+        Post postExistente = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post não encontrado"));
+
+        if (!postExistente.getAuthor().getIdUsuario().equals(usuario.getIdUsuario())) {
+            throw new RuntimeException("Você não tem permissão para atualizar este post");
+        }
+
+        postExistente.setTitulo(postAtualizado.getTitulo());
+        postExistente.setDescricao(postAtualizado.getDescricao());
+        postExistente.setData(postAtualizado.getData());
+
+        return postRepository.save(postExistente);
     }
 
-    String email = jwtUtil.extractEmail(token);
-
-    // 2️⃣ Busca o usuário pelo email
-    Usuario usuario = usuarioRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-
-    // 3️⃣ Busca o post existente
-    Post postExistente = postRepository.findById(id)
-            .orElseThrow(() -> new RuntimeException("Post não encontrado"));
-
-    // 4️⃣ Verifica se o autor do post é o mesmo do token
-    if (!postExistente.getAuthor().getIdUsuario().equals(usuario.getIdUsuario())) {
-        throw new RuntimeException("Você não tem permissão para atualizar este post");
-    }
-
-    // 5️⃣ Atualiza apenas os campos permitidos
-    postExistente.setTitulo(postAtualizado.getTitulo());
-    postExistente.setDescricao(postAtualizado.getDescricao());
-    postExistente.setData(postAtualizado.getData());
-
-    // 6️⃣ Salva e retorna o post atualizado
-    return postRepository.save(postExistente);
-}
-
-    // 🔹 Deletar post (somente o autor pode deletar)
+    // 🔹 Deletar post
     public void deletar(Long id, String token) {
         String email = (token != null) ? jwtUtil.extractEmail(token) : null;
 
         Post post = postRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Post não encontrado"));
 
-        // ✅ Verifica se o usuário do token é o autor
         if (email == null || !post.getAuthor().getEmail().equals(email)) {
             throw new RuntimeException("Usuário não autorizado para deletar este post");
         }
