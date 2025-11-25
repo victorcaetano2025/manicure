@@ -73,7 +73,7 @@ export default function Cadastrar({ onSuccess }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="flex flex-col gap-4 h-[80vh]">
 
       {error && <p className="text-red-500 text-center bg-red-100 p-2 rounded-lg">{error}</p>}
 
@@ -85,7 +85,7 @@ export default function Cadastrar({ onSuccess }) {
       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email"
         className="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500" required />
       <input type="text" value={urlFotoPerfil} onChange={(e) => setUrlFotoPerfil(e.target.value)} placeholder="URL Foto de Perfil"
-        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500" required />
+        className="w-full p-3 border border-gray-300 rounded-lg focus:ring-pink-500 focus:border-pink-500" />
 
       {/* Sexo (Dropdown para enviar F ou M) */}
       <select value={sexo} onChange={(e) => setSexo(e.target.value)}
@@ -117,7 +117,7 @@ export default function Cadastrar({ onSuccess }) {
       />
 
       {/* 2. CHECKBOX CONDICIONAL */}
-      <div className="flex items-center mt-2">
+      <div className="flex items-center mt-[1px]">
         <input
           type="checkbox"
           id="isManicure"
@@ -133,7 +133,7 @@ export default function Cadastrar({ onSuccess }) {
 
       {/* 3. CAMPOS EXTRAS DA MANICURE (RENDERIZAÇÃO CONDICIONAL) */}
       {isManicure && (
-        <div className="flex flex-col gap-3 mt-3 p-4 border border-pink-400 rounded-xl bg-pink-50 dark:bg-pink-900/10 transition-all">
+        <div className="flex flex-col gap-3 mt-[1px] p-4 border border-pink-400 rounded-xl bg-pink-50 dark:bg-pink-900/10 transition-all ">
           <h4 className="font-semibold text-pink-700 dark:text-pink-300">Detalhes Profissionais</h4>
           <input
             type="text"
@@ -158,7 +158,7 @@ export default function Cadastrar({ onSuccess }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-pink-600 text-white p-3 rounded-lg font-semibold hover:bg-pink-700 transition mt-4 shadow-lg shadow-pink-500/30 disabled:bg-gray-400 disabled:shadow-none"
+        className="w-full bg-pink-600 text-white p-3 rounded-lg font-semibold hover:bg-pink-700 transition mt-[1px] shadow-lg shadow-pink-500/30 disabled:bg-gray-400 disabled:shadow-none"
       >
         {loading ? "Enviando..." : "Cadastrar"}
       </button>
