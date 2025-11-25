@@ -82,6 +82,8 @@ public class UsuarioService implements UserDetailsService {
         return usuarioRepository.findById(id);
     }
 
+    
+
     // 🔹 Atualizar dados de um usuário
     @Transactional
     public Usuario atualizar(Long id, UsuarioDTO dto) {
