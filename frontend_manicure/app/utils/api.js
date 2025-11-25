@@ -116,40 +116,37 @@ export async function apiDeletePost(postId) {
     method: "DELETE",
   });
 }
-export async function apiGetAllUsers() {
-  // Assumindo um endpoint protegido que retorna uma lista de todos os usuários
-  // (Pode precisar de autenticação via JWT)
-  return apiFetch("/usuarios"); 
-}
+// --- Funções de Agendamentos (CRUD) ---
 
-// 🤝 Enviar solicitação de amizade (Mantido do código original, se ainda for usado)
-export async function apiSendFriendRequest(targetUserId) {
-  // Assumindo um endpoint que recebe o ID do usuário alvo no corpo ou na URL
-  return apiFetch(`/friends/request/${targetUserId}`, {
+// 📌 Criar um agendamento
+export async function apiCreateAppointment(data) {
+  return apiFetch("/agendamentos", {
     method: "POST",
+    body: JSON.stringify(data),
   });
 }
 
-// --- Funções de Seguimento (Follow/Unfollow) ---
+// 📌 Listar todos os agendamentos
+export async function apiGetAppointments() {
+  return apiFetch("/agendamentos");
+}
 
-/**
- * Inicia o seguimento de um usuário.
- * Mapeia para: POST /api/follow/{userId}
- * @param {number} userId - ID do usuário a ser seguido (Seguido).
- */
-export async function apiFollowUser(userId) {
-  return apiFetch(`/api/follow/${userId}`, {
-    method: "POST",
+// 📌 Buscar agendamento por ID
+export async function apiGetAppointmentById(appointmentId) {
+  return apiFetch(`/agendamentos/${appointmentId}`);
+}
+
+// 📌 Atualizar agendamento
+export async function apiUpdateAppointment(appointmentId, data) {
+  return apiFetch(`/agendamentos/${appointmentId}`, {
+    method: "PUT",
+    body: JSON.stringify(data),
   });
 }
 
-/**
- * Desfaz o seguimento de um usuário.
- * Mapeia para: DELETE /api/follow/{userId}
- * @param {number} userId - ID do usuário que será deixado de seguir (Seguido).
- */
-export async function apiUnfollowUser(userId) {
-  return apiFetch(`/api/follow/${userId}`, {
+// 📌 Deletar agendamento
+export async function apiDeleteAppointment(appointmentId) {
+  return apiFetch(`/agendamentos/${appointmentId}`, {
     method: "DELETE",
   });
 }

@@ -1,6 +1,7 @@
-// FriendProfile.jsx
+
 import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import AmigoDetalhes from "../component/friend/AmigoDetalhes";
 
 function FriendProfile() {
   const { state } = useLocation();
