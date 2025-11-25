@@ -22,6 +22,11 @@ public class CustomUserDetails implements UserDetails {
         return Collections.emptyList(); // sem roles por enquanto
     }
 
+    public Long getIdUsuario() {
+        // Acessamos o ID através da entidade Usuario encapsulada
+        return usuario.getIdUsuario(); 
+    }
+
     @Override
     public String getPassword() {
         return usuario.getSenha();

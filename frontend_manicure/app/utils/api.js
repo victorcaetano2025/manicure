@@ -116,3 +116,40 @@ export async function apiDeletePost(postId) {
     method: "DELETE",
   });
 }
+export async function apiGetAllUsers() {
+  // Assumindo um endpoint protegido que retorna uma lista de todos os usuários
+  // (Pode precisar de autenticação via JWT)
+  return apiFetch("/usuarios"); 
+}
+
+// 🤝 Enviar solicitação de amizade (Mantido do código original, se ainda for usado)
+export async function apiSendFriendRequest(targetUserId) {
+  // Assumindo um endpoint que recebe o ID do usuário alvo no corpo ou na URL
+  return apiFetch(`/friends/request/${targetUserId}`, {
+    method: "POST",
+  });
+}
+
+// --- Funções de Seguimento (Follow/Unfollow) ---
+
+/**
+ * Inicia o seguimento de um usuário.
+ * Mapeia para: POST /api/follow/{userId}
+ * @param {number} userId - ID do usuário a ser seguido (Seguido).
+ */
+export async function apiFollowUser(userId) {
+  return apiFetch(`/api/follow/${userId}`, {
+    method: "POST",
+  });
+}
+
+/**
+ * Desfaz o seguimento de um usuário.
+ * Mapeia para: DELETE /api/follow/{userId}
+ * @param {number} userId - ID do usuário que será deixado de seguir (Seguido).
+ */
+export async function apiUnfollowUser(userId) {
+  return apiFetch(`/api/follow/${userId}`, {
+    method: "DELETE",
+  });
+}

@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+
 import Feed from "./component/post/Feed";
 import AuthPage from "./component/auth/AuthPage";
+import FeedUsuarios from "./component/friend/FeedUsarios";
+
 import { logout } from "./utils/api"; // importa logout
 import { useRouter } from 'next/navigation';
 
@@ -109,6 +112,7 @@ export default function Home() {
               <div className="text-gray-800 dark:text-gray-100">
                 <Feed />
               </div>
+               <FeedUsuarios />
             </div>
 
             {/* COLUNA DIREITA (1/5) - Outro Tipo de Feed (Tendências) */}
@@ -118,6 +122,7 @@ export default function Home() {
                 {/* Conteúdo de Tendências, Sugestões, etc. */}
                 <p className="text-sm text-gray-500 dark:text-gray-400">Posts populares da semana.</p>
               </div>
+             
             </div>
           </main>
         </>
