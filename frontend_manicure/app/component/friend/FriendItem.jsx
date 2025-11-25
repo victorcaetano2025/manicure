@@ -1,10 +1,7 @@
 "use client";
 
 import React from "react";
-// 💡 CORREÇÃO: Removendo imports específicos do Next.js (Link e Image)
-// import Link from "next/link"; 
-// import Image from "next/image"; 
-
+import AmigoDetalhes from "friend/AmigoDetalhes";
 /**
  * Cartão de exibição para um único usuário no feed.
  * Navega para a página de perfil do usuário ao clicar.
