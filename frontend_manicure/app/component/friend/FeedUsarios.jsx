@@ -1,39 +1,51 @@
 "use client";
 
 import React, { useEffect, useState, useCallback } from 'react';
-import FriendItem from './FriendItem.jsx'; // 💡 CORREÇÃO: Usando o nome do arquivo exato e minúsculo
-import { apiGetAllUsers, apiFollowUser, apiUnfollowUser } from "../../utils/api"; // 💡 CORREÇÃO: Ajuste no caminho da API (assumindo /src/utils/api)
-
-// Removendo o AddIcon, pois usaremos um botão com texto dinâmico para melhor UX.
+import FriendItem from './FriendItem'; // 💡 CORREÇÃO: Removendo a extensão .jsx na importação
+import { 
+    apiGetAllUsers, 
+    apiFollowUser, 
+    apiUnfollowUser, 
+    apiGetFollowStatus 
+} from "../../utils/api"; // O caminho relativo para a API é mantido
 
 export default function FeedUsuarios() {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     
-    // 💡 Estado para gerenciar o status de seguimento localmente: { idUsuario: boolean }
-    // O status inicial será falso, pois a apiGetAllUsers não fornece essa informação.
+    // Estado para gerenciar o status de seguimento localmente: { idUsuario: boolean }
     const [localFollowStatus, setLocalFollowStatus] = useState({}); 
 
     const loadUsers = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            // apiGetAllUsers deve retornar uma lista de objetos DTO de usuário (com 'idUsuario', 'nome', etc.)
+            // 1. Busca a lista de todos os usuários
             const data = await apiGetAllUsers();
+            const userList = data || [];
             
-            // Inicializa o status de follow localmente como 'não seguindo' para todos
+            // 2. Cria um array de promessas para checar o status de seguimento de cada usuário
+            const statusPromises = userList.map(user => 
+                // Evita checar o status de seguimento se o ID for undefined ou null
+                user.idUsuario ? apiGetFollowStatus(user.idUsuario) : Promise.resolve(false)
+            );
+
+            // 3. Espera o resultado de todas as checagens de status
+            const followResults = await Promise.all(statusPromises);
+
+            // 4. Constrói o estado inicial de seguimento com os dados reais
             const initialStatus = {};
-            (data || []).forEach(user => {
-                // Assumimos que o ID é 'idUsuario' (padrão do backend)
-                initialStatus[user.idUsuario] = false; 
+            userList.forEach((user, index) => {
+                // Seta o status real para o ID do usuário (true ou false)
+                initialStatus[user.idUsuario] = followResults[index]; 
             });
 
-            setUsers(data || []);
+            setUsers(userList);
             setLocalFollowStatus(initialStatus);
 
         } catch (err) {
-            setError(err.message || "Erro ao carregar a lista de usuários.");
+            setError(err.message || "Erro ao carregar a lista de usuários ou status de seguimento.");
         } finally {
             setLoading(false);
         }
@@ -46,7 +58,14 @@ export default function FeedUsuarios() {
     // --- Funções de Ação: Seguir / Deixar de Seguir ---
 
     const handleToggleFollow = async (userId, isCurrentlyFollowing) => {
-        setLoading(true); // Bloqueia a interface enquanto a requisição está em andamento
+        // Define o loading específico apenas para o botão clicado
+        // Para simplificar, vou manter o loading global por enquanto para evitar desabilitar todos os botões,
+        // mas é ideal usar um estado de loading por ID para melhor UX.
+        
+        // Desabilita o botão enquanto a requisição está em andamento (loading global)
+        if (loading) return; 
+
+        setLoading(true); 
         
         try {
             if (isCurrentlyFollowing) {
@@ -72,7 +91,8 @@ export default function FeedUsuarios() {
         
         } catch (err) {
             // Exibe mensagem de erro do backend (ex: "Você já está seguindo este usuário")
-            alert(`Falha na operação: ${err.message}`); 
+            // Usamos window.alert temporariamente, mas idealmente seria um modal customizado
+            window.alert(`Falha na operação: ${err.message}`); 
             
         } finally {
             setLoading(false);
@@ -95,7 +115,10 @@ export default function FeedUsuarios() {
                 {users.map(user => {
                     // Usa o campo 'idUsuario' do DTO
                     const userId = user.idUsuario;
-                    // Verifica o status de seguimento local
+                    // Evita renderizar se o ID for inválido (após a correção no loadUsers)
+                    if (!userId) return null; 
+
+                    // Verifica o status de seguimento, usando o status real da API
                     const isFollowing = localFollowStatus[userId] || false; 
 
                     return (
@@ -111,7 +134,8 @@ export default function FeedUsuarios() {
                             <div className="w-28 flex justify-end">
                                 <button 
                                     onClick={() => handleToggleFollow(userId, isFollowing)} 
-                                    disabled={loading} // Desabilita enquanto qualquer requisição está em andamento
+                                    // Desabilita apenas se estiver em um estado de loading global
+                                    disabled={loading} 
                                     className={`
                                         px-3 py-1 text-sm font-semibold rounded-full transition duration-150 whitespace-nowrap
                                         ${isFollowing 

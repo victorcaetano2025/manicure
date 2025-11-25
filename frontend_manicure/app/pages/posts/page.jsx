@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
-import { getToken } from "../utils/api";
-import MyFeed from "../component/post/MyFeed"; 
-import CreatePostComponent from "../component/post/CreatePost";
-import UpdatePost from "../component/post/UpdatePost"; // 💡 NOVO: Importando o componente de edição
+import { getToken } from "../../utils/api";
+import MyFeed from "../../component/post/MyFeed"; 
+import CreatePostComponent from "../../component/post/CreatePost";
+import UpdatePost from "../../component/post/UpdatePost"; // 💡 NOVO: Importando o componente de edição
 
 export default function PostsPage() {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);

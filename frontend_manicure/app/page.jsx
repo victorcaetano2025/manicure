@@ -32,7 +32,7 @@ export default function Home() {
 
   const irPara = () => {
     // 3. Use router.push() para mudar a rota
-    router.push('/posts');
+    router.push('/pages/posts');
   };
 
   return (
@@ -95,11 +95,7 @@ export default function Home() {
                       Sobre
                     </Link>
                   </li>
-                  <li>
-                    <Link href="/createposts" className="text-gray-600 dark:text-gray-300 hover:text-pink-500 transition">
-                      CriarPost
-                    </Link>
-                  </li>
+                  <li></li>
                   {/* Adicione links para Postar, Perfil, etc. */}
                 </ul>
               </nav>

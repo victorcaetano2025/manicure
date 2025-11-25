@@ -32,7 +32,7 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(name = "url_foto_perfil")
+    @Column(nullable = true, name = "url_foto_perfil")
     private String urlFotoPerfil;
 
     @Enumerated(EnumType.STRING)
