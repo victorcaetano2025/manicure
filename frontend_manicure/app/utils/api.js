@@ -24,12 +24,17 @@ export function logout() {
   }
 }
 
-// Fetch genérico com JWT
+/**
+ * Fetch genérico com JWT.
+ * Lida com headers, JSON body e tratamento de erros.
+ */
 export async function apiFetch(path, options = {}) {
   const token = getToken();
   const headers = { ...(options.headers || {}) };
 
+  // Adiciona Content-Type se houver body
   if (options.body) headers["Content-Type"] = "application/json";
+  // Adiciona o token JWT
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(`${API_URL}${path}`, { ...options, headers });
@@ -37,6 +42,7 @@ export async function apiFetch(path, options = {}) {
   if (!res.ok) {
     const contentType = res.headers.get("content-type");
     let errorMessage = res.statusText;
+    
     if (contentType?.includes("application/json")) {
       const errorJson = await res.json();
       // Tentativa de pegar a mensagem de erro da API, se existir
@@ -48,7 +54,10 @@ export async function apiFetch(path, options = {}) {
     throw new Error(errorMessage);
   }
 
-  if (res.status === 204) return null; // No Content
+  // Lida com 204 No Content (usado no unfollow e delete)
+  if (res.status === 204 || res.status === 201 && options.method === 'POST' && !res.headers.get('content-type')) return null;
+  
+  // Retorna o JSON da resposta (status 200, 201 com body, etc.)
   return res.json();
 }
 
@@ -73,7 +82,7 @@ export async function apiLogin({ email, senha }) {
 
 // Buscar usuário logado
 export async function apiGetUser() {
-  return apiFetch("/user/me");
+  return apiFetch("/usuarios/me");
 }
 
 // --- Funções de Posts (CRUD) ---
@@ -116,6 +125,57 @@ export async function apiDeletePost(postId) {
     method: "DELETE",
   });
 }
+
+// --- Funções de friend (Feed follow e unfolllaw) ---
+
+export async function apiGetAllUsers() {
+  // Assumindo um endpoint protegido que retorna uma lista de todos os usuários
+  // (Pode precisar de autenticação via JWT)
+  return apiFetch("/usuarios"); 
+}
+
+// --- Funções de Seguimento (Follow/Unfollow/Status) ---
+
+/**
+ * Inicia o seguimento de um usuário, enviando o ID no corpo JSON.
+ * Mapeia para: POST /api/follow
+ * @param {number} userId - ID do usuário a ser seguido (Seguido).
+ */
+export async function apiFollowUser(userId) {
+  // ALTERAÇÃO: Envia o ID no corpo JSON e não na URL.
+  return apiFetch(`/api/follow`, {
+    method: "POST",
+    body: JSON.stringify({ seguidoId: userId }),
+  });
+}
+
+/**
+ * Desfaz o seguimento de um usuário, enviando o ID no corpo JSON.
+ * Mapeia para: DELETE /api/follow
+ * @param {number} userId - ID do usuário que será deixado de seguir (Seguido).
+ */
+export async function apiUnfollowUser(userId) {
+  // ALTERAÇÃO: Envia o ID no corpo JSON e não na URL.
+  return apiFetch(`/api/follow`, {
+    method: "DELETE",
+    body: JSON.stringify({ seguidoId: userId }),
+  });
+}
+
+/**
+ * Verifica se o usuário logado está seguindo o usuário alvo.
+ * Mapeia para: GET /api/follow/status/{userId}
+ * @param {number} userId - ID do usuário alvo.
+ * @returns {boolean} True se estiver seguindo, false caso contrário.
+ */
+export async function apiGetFollowStatus(userId) {
+  // NOVO ENDPOINT: Usa Path Variable
+  return apiFetch(`/api/follow/status/${userId}`, {
+    method: "GET",
+  });
+}
+
+
 // --- Funções de Agendamentos (CRUD) ---
 
 // 📌 Criar um agendamento
