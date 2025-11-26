@@ -4,6 +4,10 @@ import { useState, useEffect, useCallback } from 'react';
 // Biblioteca de data popular. Você pode precisar instalá-la: npm install react-datepicker date-fns
 import DatePicker from 'react-datepicker'; 
 import "react-datepicker/dist/react-datepicker.css"; // Estilo básico
+import ListaAgendamento from '../../component/agendamento/ListaAgendamento';
+import VisualizacaoAgendamento from '../../component/agendamento/VisualizacaoAgendamento';
+import CriarAgendamento from '../../component/agendamento/CriarAgendamento';
+import DetalhesAgendamento from '../../component/agendamento/id/DetalhesAgendamento';
 
 // Importe a função API que você modificou (assumindo que api.js é o caminho correto)
 import { postData, fetchData } from '@/app/utils/api'; // Ajuste o caminho conforme sua estrutura real
