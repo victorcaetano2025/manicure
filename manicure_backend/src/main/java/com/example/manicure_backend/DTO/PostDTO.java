@@ -1,4 +1,4 @@
-package com.example.manicure_backend.dto;
+package com.example.manicure_backend.DTO;
 // ... imports
 
 import java.time.LocalDate;

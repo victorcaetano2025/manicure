@@ -2,7 +2,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #gray;
+  --foreground: #171717; /* Corrigido de #gray para um cinza escuro válido */
 }
 
 @theme inline {
@@ -14,8 +14,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #dark-gray;
-    --foreground: #black;
+    --background: #0a0a0a; /* Corrigido de #dark-gray para um fundo dark padrão */
+    --foreground: #ededed; /* Corrigido de #black para texto claro (legibilidade) */
   }
 }
 
@@ -25,4 +25,55 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+/* --- ESTILOS PERSONALIZADOS DO PROJETO --- */
 
+/* Scrollbar Personalizada (Para o Modal de Cadastro) */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #ec4899; /* Pink-500 */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #db2777; /* Pink-600 */
+}
+
+/* Animação suave para os campos extras de Manicure */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeIn {
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* ... seu código ... */
+
+/* --- FORÇA BRUTA PARA CAMPOS VISÍVEIS --- */
+input, select, textarea {
+  background-color: #ffffff !important;
+  color: #111827 !important; /* Preto forte (gray-900) */
+  border: 1px solid #d1d5db !important;
+  -webkit-text-fill-color: #111827 !important; /* Garante no Safari/Chrome */
+}
+
+/* Corrige ícone de calendário */
+::-webkit-calendar-picker-indicator {
+    filter: invert(0) !important; /* Força ícone escuro */
+}
+
+/* Modo escuro específico para inputs */
+@media (prefers-color-scheme: dark) {
+  input, select, textarea {
+    background-color: #ffffff !important;
+    color: #000000 !important;
+  }
+}

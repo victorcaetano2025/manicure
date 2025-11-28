@@ -1,6 +1,6 @@
 package com.example.manicure_backend.service;
 
-import com.example.manicure_backend.dto.PostDTO;
+import com.example.manicure_backend.DTO.PostDTO;
 import com.example.manicure_backend.model.Complementos;
 import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.model.Usuario;

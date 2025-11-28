@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import AmigoDetalhes from "friend/AmigoDetalhes";
+import AmigoDetalhes from "./AmigoDetalhes";
 /**
  * Cartão de exibição para um único usuário no feed.
  * Navega para a página de perfil do usuário ao clicar.

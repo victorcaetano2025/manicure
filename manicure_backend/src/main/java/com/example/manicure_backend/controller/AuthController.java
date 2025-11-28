@@ -1,7 +1,7 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.dto.LoginRequest;
-import com.example.manicure_backend.dto.UsuarioDTO;
+import com.example.manicure_backend.DTO.LoginRequest;
+import com.example.manicure_backend.DTO.UsuarioDTO;
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.security.JwtUtil;
 import com.example.manicure_backend.service.UsuarioService;

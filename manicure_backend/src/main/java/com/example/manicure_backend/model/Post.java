@@ -38,9 +38,10 @@ public class Post {
     @Column(name = "descricao", columnDefinition = "TEXT")
     private String descricao;
 
-    // 💡 NOVO CAMPO: URL DA IMAGEM
-    @Column(name = "url_imagem") // Nullable, caso a imagem não seja obrigatória
-    private String urlImagem; 
+    // 💡 SOLUÇÃO: Adicionamos columnDefinition = "TEXT" para aceitar links gigantes ou Base64
+    // Se estiver usando MySQL no futuro, use columnDefinition = "LONGTEXT"
+    @Column(name = "url_imagem", columnDefinition = "TEXT") 
+    private String urlImagem;
     
     @CreationTimestamp
     @Column(name = "data_post", nullable = false)

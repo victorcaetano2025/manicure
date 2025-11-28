@@ -1,7 +1,7 @@
 package com.example.manicure_backend.controller;
 
 import com.example.manicure_backend.service.SeguindoService;
-import com.example.manicure_backend.dto.SeguindoRequestDTO;
+import com.example.manicure_backend.DTO.SeguindoRequestDTO;
 import com.example.manicure_backend.security.CustomUserDetails;
 
 import java.util.NoSuchElementException;

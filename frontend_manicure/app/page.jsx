@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
+import { useRouter } from 'next/navigation';
 
+// Componentes
 import Feed from "./component/post/Feed";
 import AuthPage from "./component/auth/AuthPage";
 import FeedUsuarios from "./component/friend/FeedUsarios";
 
-import { logout } from "./utils/api"; // importa logout
-import { useRouter } from 'next/navigation';
+// Utils
+import { logout } from "./utils/api";
 
 export default function Home() {
     const [authModal, setAuthModal] = useState(false);
@@ -16,15 +17,8 @@ export default function Home() {
     const router = useRouter();
     
     useEffect(() => {
-        // 💡 ATENÇÃO: Em uma aplicação real, você deve usar um serviço de autenticação
-        // baseado em cookie/session ou verificar o token com uma API para confirmar a validade.
-        const token = localStorage.getItem("token"); 
-        if (!token) {
-            setAuthModal(true);
-            setIsLogged(false);
-        } else {
-            setIsLogged(true);
-        }
+        const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+        setIsLogged(!!token);
     }, []);
 
     const handleLogout = () => {
@@ -34,112 +28,77 @@ export default function Home() {
     };
 
     const irPara = (url) => {
-    // A função pode ir para qualquer lugar que você passar
-    router.push(url);
-};
+        router.push(url);
+    };
 
     return (
-        // 1. CONTAINER PRINCIPAL: Define largura máxima (xl) e centraliza a página (mx-auto).
-        <div className="p-4 mx-auto max-w-screen-xl min-h-screen">
+        <div className="p-4 mx-auto max-w-screen-xl min-h-screen bg-white dark:bg-black">
 
-            {/* Modal de login/cadastro */}
+            {/* Modal de Autenticação */}
             {authModal && (
                 <AuthPage
                     onClose={() => {
                         setAuthModal(false);
-                        setIsLogged(true);
+                        if(localStorage.getItem("token")) setIsLogged(true);
                     }}
                 />
             )}
 
-            {/* Conteúdo da Home */}
-            {!authModal && (
-                <>
-                    <header className="flex justify-between items-center py-4 border-b border-gray-200 dark:border-gray-700 mb-8">
-                        <h1 className="text-3xl font-extrabold text-pink-600">Belanetic 💅</h1>
+            {/* Cabeçalho */}
+            <header className="flex flex-col md:flex-row justify-between items-center py-4 border-b border-gray-100 dark:border-gray-800 mb-8 gap-4 bg-white dark:bg-black">
+                <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
+                    <span className="text-3xl">💅</span>
+                    <h1 className="text-3xl font-extrabold text-pink-600 tracking-tight">Belanetic</h1>
+                </div>
 
-                        <p>pesquisa</p>
+                {/* Barra de Pesquisa */}
+                <div className="relative w-full md:w-96">
+                    <input 
+                        type="text" 
+                        placeholder="Pesquisar..." 
+                        className="w-full bg-gray-50 border border-gray-200 rounded-full py-2 px-4 pl-10 focus:outline-none focus:ring-2 focus:ring-pink-500 text-black placeholder-gray-400"
+                    />
+                    <span className="absolute left-3 top-2.5 text-gray-400">🔍</span>
+                </div>
 
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={() => irPara('/pages/agendamentos')}
-                                className="bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-pink-700 transition"
-                            >
-                                Agendamentos
-                            </button>
+                <div className="flex items-center space-x-3">
+                    <button onClick={() => irPara('/agendamentos')} className="text-gray-600 hover:text-pink-600 font-semibold py-2 px-4 transition dark:text-gray-300">📅 Agendar</button>
+                    <button onClick={() => irPara('/posts')} className="text-gray-600 hover:text-pink-600 font-semibold py-2 px-4 transition dark:text-gray-300">📷 Feed</button>
+                    <button onClick={() => irPara('/perfil')} className="text-gray-600 hover:text-pink-600 font-semibold py-2 px-4 transition dark:text-gray-300">👤 Perfil</button>
 
-                            <button
-                                onClick={() => irPara('/pages/posts')}
-                                className="bg-pink-600 text-white font-semibold py-3 px-6 rounded-lg shadow-md hover:bg-pink-700 transition"
-                            >
-                                Posts
-                            </button>
+                    {isLogged ? (
+                        <button onClick={handleLogout} className="bg-red-50 text-red-500 px-5 py-2 rounded-full font-bold hover:bg-red-500 hover:text-white transition">Sair</button>
+                    ) : (
+                        <button onClick={() => setAuthModal(true)} className="bg-pink-600 text-white px-6 py-2 rounded-full font-bold hover:bg-pink-700 transition">Entrar</button>
+                    )}
+                </div>
+            </header>
 
-                            {isLogged ? (
-                                <button
-                                    onClick={handleLogout}
-                                    className="bg-red-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-red-600 transition shadow-md"
-                                >
-                                    Sair
-                                </button>
-                            ) : (
-                                <button
-                                    onClick={() => setAuthModal(true)}
-                                    className="bg-pink-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-pink-600 transition shadow-md"
-                                >
-                                    Entrar / Cadastrar
-                                </button>
-                            )}
-                        </div>
-                    </header>
+            {/* Layout Principal */}
+            <main className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                {/* Menu Esquerdo */}
+                <div className="hidden lg:block lg:col-span-3">
+                    <div className="sticky top-4 bg-pink-50 rounded-2xl p-6 border border-pink-100">
+                        <h3 className="font-bold text-pink-800 mb-2">Bem-vindo(a)! ✨</h3>
+                        <p className="text-sm text-pink-600 mb-4">Gerencie seus horários e posts.</p>
+                        {!isLogged && <button onClick={() => setAuthModal(true)} className="w-full bg-white text-pink-600 font-bold py-2 rounded-lg shadow-sm">Começar</button>}
+                    </div>
+                </div>
 
-                    {/* 2. LAYOUT AJUSTADO: Usando grid-cols-12 para maior flexibilidade (2/7/3) */}
-                    <main className="grid grid-cols-12 gap-8 ">
+                {/* Feed Central */}
+                <div className="col-span-1 lg:col-span-6">
+                    <Feed />
+                </div>
 
-                        {/* COLUNA ESQUERDA (2/12) - Navegação */}
-                        <div className="hidden lg:block col-span-2">
-                            <h2 className="text-lg font-semibold mb-3 text-gray-700">Navegação</h2>
-                            <nav className="mt-6">
-                                <ul className="space-y-2">
-                                    <li>
-                                        <Link href="/" className="text-gray-600 dark:text-gray-300 hover:text-pink-500 transition">
-                                            Sobre
-                                        </Link>
-                                    </li>
-                                    {/* Adicione links para Postar, Perfil, etc. */}
-                                </ul>
-                            </nav>
-                        </div>
+                {/* Sugestões Direita */}
+                <div className="col-span-1 lg:col-span-3">
+                    <div className="sticky top-4">
+                        <FeedUsuarios />
+                    </div>
+                </div>
 
-                        {/* COLUNA CENTRAL (7/12) - FEED PRINCIPAL */}
-                        {/* Ocupa a largura total (col-span-12) em telas pequenas e 7 colunas em telas grandes (lg) */}
-                        <div className="col-span-12 lg:col-span-7">
-                            <div className="text-gray-800 dark:text-gray-100">
-                                <Feed />
-                            </div>
-                        </div>
-
-                        {/* COLUNA DIREITA (3/12) - Feed Usuários e Tendências */}
-                        {/* Ocupa a largura total (col-span-12) em telas pequenas e 3 colunas em telas grandes (lg) */}
-                        <div className="col-span-12 lg:col-span-3 space-y-8">
-                            
-                            {/* Feed de Usuários: Agora com mais espaço horizontal */}
-                            <div className="p-2">
-                                <FeedUsuarios />
-                            </div>
-
-                            {/* Tendências */}
-                            <div>
-                                <h2 className="text-lg font-semibold mb-3 text-gray-700">Tendências</h2>
-                                <div className="bg-gray-100 dark:bg-gray-800 p-4 rounded-xl shadow-inner">
-                                    {/* Conteúdo de Tendências, Sugestões, etc. */}
-                                    <p className="text-sm text-gray-500 dark:text-gray-400">Posts populares da semana.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </main>
-                </>
-            )}
+            </main>
         </div>
     );
 }
