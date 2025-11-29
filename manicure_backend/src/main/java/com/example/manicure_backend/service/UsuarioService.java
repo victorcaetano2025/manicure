@@ -1,20 +1,16 @@
 package com.example.manicure_backend.service;
 
 import com.example.manicure_backend.DTO.UsuarioDTO;
-import com.example.manicure_backend.model.Complementos;
-import com.example.manicure_backend.model.Sexo;
-import com.example.manicure_backend.model.Usuario;
-import com.example.manicure_backend.repository.ComplementosRepository;
-import com.example.manicure_backend.repository.UsuarioRepository;
-import com.example.manicure_backend.security.CustomUserDetails;
+import com.example.manicure_backend.model.*;
+import com.example.manicure_backend.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -22,24 +18,63 @@ public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
     private final ComplementosRepository complementosRepository;
+    private final SeguindoRepository seguindoRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // 🔹 Implementação necessária para o Spring Security
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
-        return new CustomUserDetails(usuario);
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado"));
+
+        return User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getSenha())
+                .authorities(List.of()) // ✅ SEM ROLE
+                .build();
     }
 
-    // 🔹 Registrar novo usuário (com ou sem complementos)
+    public Optional<Usuario> login(String email, String senha) {
+        return usuarioRepository.findByEmail(email).filter(u -> passwordEncoder.matches(senha, u.getSenha()));
+    }
+
+    @Transactional(readOnly = true)
+    public UsuarioDTO toDTO(Usuario user, Long meuId) {
+        Complementos comp = user.getComplemento();
+        boolean isManicure = comp != null;
+
+        long seguidores = seguindoRepository.countBySeguido_IdUsuario(user.getIdUsuario());
+        long seguindo = seguindoRepository.countBySeguidor_IdUsuario(user.getIdUsuario());
+        boolean sigoEle = (meuId != null)
+                && seguindoRepository.existsBySeguidor_IdUsuarioAndSeguido_IdUsuario(meuId, user.getIdUsuario());
+
+        return UsuarioDTO.builder()
+                .idUsuario(user.getIdUsuario())
+                .nome(user.getNome())
+                .email(user.getEmail())
+                .idade(user.getIdade())
+                .sexo(user.getSexo())
+                .urlFotoPerfil(user.getUrlFotoPerfil())
+                .especialidade(isManicure ? comp.getEspecialidade() : null)
+                .regiao(isManicure ? comp.getRegiao() : null)
+                .isManicure(isManicure)
+                .seguidores(seguidores)
+                .seguindo(seguindo)
+                .seguidoPorMim(sigoEle)
+                .build();
+    }
+
+    public List<UsuarioDTO> listarApenasManicures() {
+        return usuarioRepository.findAllManicures().stream()
+                .map(u -> toDTO(u, null))
+                .collect(Collectors.toList());
+    }
+
     @Transactional
     public Usuario registrarUsuario(UsuarioDTO dto) {
-        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent()) {
-            throw new RuntimeException("Email já cadastrado!");
-        }
+        if (usuarioRepository.findByEmail(dto.getEmail()).isPresent())
+            throw new RuntimeException("Email já cadastrado");
 
-        // Cria o usuário com senha criptografada
         Usuario usuario = Usuario.builder()
                 .nome(dto.getNome())
                 .email(dto.getEmail())
@@ -49,90 +84,61 @@ public class UsuarioService implements UserDetailsService {
                 .senha(passwordEncoder.encode(dto.getSenha()))
                 .build();
 
+        // 1. Salva o usuário
         usuario = usuarioRepository.save(usuario);
 
-        // Cria o complemento (opcional)
-        if (dto.getEspecialidade() != null || dto.getRegiao() != null) {
-            Complementos complemento = Complementos.builder()
-                    .especialidade(dto.getEspecialidade())
-                    .regiao(dto.getRegiao())
-                    .usuario(usuario)
-                    .build();
+        // 2. Se for manicure, SALVA O COMPLEMENTO
+        if (dto.getEspecialidade() != null && !dto.getEspecialidade().trim().isEmpty()) {
+            Complementos c = new Complementos();
+            c.setUsuario(usuario); // Liga ao usuário recém criado
+            c.setEspecialidade(dto.getEspecialidade());
+            c.setRegiao(dto.getRegiao());
 
-            complementosRepository.save(complemento);
-            usuario.setComplemento(complemento);
+            complementosRepository.save(c); // Grava no banco
+            usuario.setComplemento(c); // Atualiza objeto em memória
         }
-
         return usuario;
     }
 
-    // 🔹 Login (validação de senha com BCrypt)
-    public Optional<Usuario> login(String email, String senha) {
-        return usuarioRepository.findByEmail(email)
-                .filter(user -> passwordEncoder.matches(senha, user.getSenha()));
-    }
-
-    // 🔹 Listar todos os usuários
-    public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll();
-    }
-
-    // 🔹 Buscar por ID
-    public Optional<Usuario> buscarPorId(Long id) {
-        return usuarioRepository.findById(id);
-    }
-
-    
-
-    // 🔹 Atualizar dados de um usuário
     @Transactional
     public Usuario atualizar(Long id, UsuarioDTO dto) {
-        return usuarioRepository.findById(id).map(usuario -> {
+        Usuario usuario = usuarioRepository.findById(id).orElseThrow();
+        if (dto.getNome() != null)
+            usuario.setNome(dto.getNome());
+        if (dto.getIdade() != null)
+            usuario.setIdade(dto.getIdade());
+        if (dto.getUrlFotoPerfil() != null)
+            usuario.setUrlFotoPerfil(dto.getUrlFotoPerfil());
+        if (dto.getSenha() != null && !dto.getSenha().isBlank())
+            usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
 
-            // Atualiza dados principais
-            if (dto.getNome() != null) usuario.setNome(dto.getNome());
-            if (dto.getEmail() != null) usuario.setEmail(dto.getEmail());
-            if (dto.getIdade() != null) usuario.setIdade(dto.getIdade());
-            if (dto.getSexo() != null) usuario.setSexo(dto.getSexo());
-            if (dto.getUrlFotoPerfil() != null) usuario.setUrlFotoPerfil(dto.getUrlFotoPerfil());
-
-            // Atualiza a senha se for informada
-            if (dto.getSenha() != null && !dto.getSenha().isBlank()) {
-                usuario.setSenha(passwordEncoder.encode(dto.getSenha()));
+        if (dto.getEspecialidade() != null && !dto.getEspecialidade().isBlank()) {
+            Complementos comp = usuario.getComplemento();
+            if (comp == null) {
+                comp = new Complementos();
+                comp.setUsuario(usuario);
             }
-
-            // Atualiza ou cria o complemento
-            if (dto.getEspecialidade() != null || dto.getRegiao() != null) {
-                Complementos complemento = usuario.getComplemento();
-                if (complemento == null) {
-                    complemento = new Complementos();
-                    complemento.setUsuario(usuario);
-                }
-
-                if (dto.getEspecialidade() != null) complemento.setEspecialidade(dto.getEspecialidade());
-                if (dto.getRegiao() != null) complemento.setRegiao(dto.getRegiao());
-
-                complementosRepository.save(complemento);
-                usuario.setComplemento(complemento);
+            comp.setEspecialidade(dto.getEspecialidade());
+            comp.setRegiao(dto.getRegiao());
+            complementosRepository.save(comp);
+            usuario.setComplemento(comp);
+        } else if (dto.getEspecialidade() != null && dto.getEspecialidade().isEmpty()) {
+            if (usuario.getComplemento() != null) {
+                complementosRepository.delete(usuario.getComplemento());
+                usuario.setComplemento(null);
             }
-
-            return usuarioRepository.save(usuario);
-        }).orElse(null);
-    }
-
-    // 🔹 Deletar usuário por ID
-    @Transactional
-    public void deletar(Long id) {
-        usuarioRepository.deleteById(id);
-    }
-
-    // 🔹 Buscar por sexo (string convertida para enum)
-    public List<Usuario> buscarPorSexo(String sexo) {
-        try {
-            Sexo enumSexo = Sexo.valueOf(sexo.toUpperCase());
-            return usuarioRepository.findBySexo(enumSexo);
-        } catch (IllegalArgumentException e) {
-            return List.of(); // retorna lista vazia se o valor for inválido
         }
+        return usuarioRepository.save(usuario);
+    }
+
+    public UsuarioDTO buscarPorIdDTO(Long id, Long meuId) {
+        return toDTO(usuarioRepository.findById(id).orElseThrow(), meuId);
+    }
+
+    public List<UsuarioDTO> buscarPorNome(String nome, Long meuId) {
+        if (nome == null)
+            nome = "";
+        return usuarioRepository.findByNomeContainingIgnoreCase(nome).stream().map(u -> toDTO(u, meuId))
+                .collect(Collectors.toList());
     }
 }

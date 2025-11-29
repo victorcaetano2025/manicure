@@ -11,16 +11,21 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioDTO {
-
-    // 🔹 Dados principais do usuário
+    private Long idUsuario;
     private String nome;
     private Integer idade;
-    private String senha;
     private String email;
+    private String senha;
     private String urlFotoPerfil;
     private Sexo sexo;
 
-    // 🔹 Dados opcionais — complementos
+    // Dados de Manicure
     private String especialidade;
     private String regiao;
+    private boolean isManicure;
+
+    // Dados Sociais (Novos)
+    private long seguidores;
+    private long seguindo;
+    private boolean seguidoPorMim;
 }

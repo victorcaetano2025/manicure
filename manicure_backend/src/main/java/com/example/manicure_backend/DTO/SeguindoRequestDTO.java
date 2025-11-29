@@ -1,16 +1,22 @@
 package com.example.manicure_backend.DTO;
-
-import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class SeguindoRequestDTO {
-
-    // ⭐ O único campo que será exigido no JSON enviado pelo front-end ⭐
-    @NotNull(message = "O ID do usuário a ser seguido (seguidoId) não pode ser nulo.")
+    
     private Long seguidoId;
+
+    // 1. Construtor Vazio (OBRIGATÓRIO para o JSON funcionar)
+    public SeguindoRequestDTO() {}
+
+    // 2. Construtor com argumentos
+    public SeguindoRequestDTO(Long seguidoId) {
+        this.seguidoId = seguidoId;
+    }
+
+    // 3. Getters e Setters
+    public Long getSeguidoId() {
+        return seguidoId;
+    }
+
+    public void setSeguidoId(Long seguidoId) {
+        this.seguidoId = seguidoId;
+    }
 }

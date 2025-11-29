@@ -1,28 +1,30 @@
 package com.example.manicure_backend.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "complementos")
+@Table(name = "comentarios")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Complementos {
-
+public class Comentario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long idComplemento;
+    private Long id;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "id_usuario")
-    @JsonBackReference // Impede loop infinito
     private Usuario usuario;
 
-    @Column(nullable = false)
-    private String especialidade;
+    @ManyToOne
+    @JoinColumn(name = "id_post")
+    private Post post;
 
-    private String regiao;
+    @Column(nullable = false)
+    private String texto;
+
+    private LocalDateTime data = LocalDateTime.now();
 }

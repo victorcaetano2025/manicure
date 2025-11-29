@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
+// Subindo 2 níveis para chegar em utils (component -> Agendamento -> app -> utils)
 import { apiCreateAgendamento, apiGetAgendamento, apiDeleteAgendamento, apiGetManicures } from "../../utils/api";
 
 export default function CriarAgendamento() {
@@ -9,26 +10,17 @@ export default function CriarAgendamento() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    async function carregarDados() {
+      try {
+        const lista = await apiGetManicures();
+        setManicures(lista || []);
+
+        const agendamentos = await apiGetAgendamento();
+        setMeusAgendamentos(agendamentos || []);
+      } catch (error) { console.error(error); }
+    }
     carregarDados();
   }, []);
-
-  async function carregarDados() {
-    try {
-      const usuarios = await apiGetManicures();
-      
-      // 💡 FILTRO REFORÇADO: Só mostra quem tem objeto 'complemento' (Manicures)
-      const listaManicures = Array.isArray(usuarios) 
-        ? usuarios.filter(u => u.complemento !== null && typeof u.complemento === 'object') 
-        : [];
-      
-      setManicures(listaManicures);
-
-      const agendamentos = await apiGetAgendamento();
-      setMeusAgendamentos(agendamentos || []);
-    } catch (error) {
-      console.error("Erro ao carregar dados", error);
-    }
-  }
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -37,7 +29,6 @@ export default function CriarAgendamento() {
     if (!form.manicureId) return alert("Selecione uma manicure!");
     setLoading(true);
     
-    // Formata Data (YYYY-MM-DD -> DD/MM/YYYY)
     let dataFormatada = form.data;
     if (form.data.includes("-")) {
         const [ano, mes, dia] = form.data.split("-");
@@ -53,101 +44,79 @@ export default function CriarAgendamento() {
 
     try {
       await apiCreateAgendamento(payload);
-      alert("Agendamento realizado com sucesso! 💅");
+      alert("Agendado com sucesso!");
       setForm({ manicureId: "", data: "", horario: "", descricao: "" });
-      carregarDados(); // Recarrega a lista
+      // Atualiza a lista
+      const att = await apiGetAgendamento();
+      setMeusAgendamentos(att || []);
     } catch (error) {
-      alert("Erro ao agendar: " + error.message);
+      alert("Erro: " + error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Tem certeza que deseja cancelar?")) return;
+    if (!confirm("Cancelar este agendamento?")) return;
     try {
       await apiDeleteAgendamento(id);
       setMeusAgendamentos(meusAgendamentos.filter(a => a.idAgendamento !== id));
-    } catch (error) {
-      alert("Erro ao cancelar.");
-    }
+    } catch (error) { alert("Erro ao cancelar."); }
   };
 
-  // Classes fixas para garantir visibilidade (Fundo Branco, Letra Escura)
-  const inputClass = "w-full p-3 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-pink-500 focus:border-pink-500 outline-none";
+  const inputClass = "w-full p-3 bg-white text-black border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 outline-none block";
 
   return (
-    <div className="max-w-lg mx-auto">
-      
-      {/* CARD DE AGENDAMENTO */}
-      <div className="p-6 bg-white rounded-2xl shadow-lg border border-pink-100 mb-8">
-        <h2 className="text-2xl font-bold text-center text-pink-600 mb-6">Novo Agendamento</h2>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Escolha a Profissional</label>
-                <select 
-                    name="manicureId" 
-                    value={form.manicureId} 
-                    onChange={handleChange} 
-                    required 
-                    className={inputClass}
-                >
-                    <option value="">Selecione...</option>
-                    {manicures.map(m => (
-                        <option key={m.idUsuario} value={m.idUsuario}>
-                            {m.nome} {m.complemento?.especialidade ? `(${m.complemento.especialidade})` : ''}
-                        </option>
-                    ))}
-                </select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Data</label>
-                    <input type="date" name="data" value={form.data} onChange={handleChange} required className={inputClass} />
-                </div>
-                <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-1">Horário</label>
-                    <input type="time" name="horario" value={form.horario} onChange={handleChange} required className={inputClass} />
-                </div>
-            </div>
-
-            <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1">Serviço / Descrição</label>
-                <input type="text" name="descricao" value={form.descricao} onChange={handleChange} placeholder="Ex: Unha de Gel" required className={inputClass} />
-            </div>
-
-            <button type="submit" disabled={loading} className="w-full bg-pink-600 text-white font-bold py-3 rounded-xl hover:bg-pink-700 transition shadow-md disabled:opacity-50">
-                {loading ? "Agendando..." : "Confirmar Agendamento"}
-            </button>
-        </form>
+    <div className="max-w-lg mx-auto bg-white rounded-xl shadow-md border border-gray-100 overflow-hidden">
+      <div className="bg-pink-600 p-4 text-center">
+        <h2 className="text-xl font-bold text-white">Novo Agendamento</h2>
       </div>
 
-      {/* LISTA DE AGENDAMENTOS (RESTAURADA) */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6">
-          <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
-            📅 Meus Horários Marcados
-          </h3>
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Escolha a Profissional</label>
+            <select name="manicureId" value={form.manicureId} onChange={handleChange} required className={inputClass}>
+                <option value="">Selecione...</option>
+                {manicures.map(m => (
+                    <option key={m.idUsuario} value={m.idUsuario}>
+                        {m.nome} {m.especialidade ? `(${m.especialidade})` : ''}
+                    </option>
+                ))}
+            </select>
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+            <div><label className="block text-sm font-bold text-gray-700 mb-1">Data</label><input type="date" name="data" value={form.data} onChange={handleChange} required className={inputClass} /></div>
+            <div><label className="block text-sm font-bold text-gray-700 mb-1">Horário</label><input type="time" name="horario" value={form.horario} onChange={handleChange} required className={inputClass} /></div>
+        </div>
+
+        <div><label className="block text-sm font-bold text-gray-700 mb-1">Serviço</label><input type="text" name="descricao" value={form.descricao} onChange={handleChange} placeholder="Ex: Unha de Gel" required className={inputClass} /></div>
+
+        <button type="submit" disabled={loading} className="w-full bg-pink-600 text-white font-bold py-3 rounded-lg hover:bg-pink-700 mt-2">{loading ? "Agendando..." : "Confirmar"}</button>
+      </form>
+
+      {/* --- LISTA DE AGENDAMENTOS (ATUALIZADA) --- */}
+      <div className="bg-gray-50 p-6 border-t border-gray-200">
+          <h3 className="font-bold text-gray-700 mb-4 text-sm uppercase tracking-wide">Meus Agendamentos</h3>
           
-          {meusAgendamentos.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                  <p>Você ainda não tem agendamentos.</p>
-              </div>
-          ) : (
+          {meusAgendamentos.length === 0 ? <p className="text-gray-400 text-center text-sm">Sem agendamentos.</p> : (
               <ul className="space-y-3">
                   {meusAgendamentos.map(a => (
-                      <li key={a.idAgendamento} className="flex justify-between items-center bg-pink-50 p-4 rounded-xl border border-pink-100">
+                      <li key={a.idAgendamento} className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex justify-between items-start">
                           <div>
-                              <p className="font-bold text-pink-800 text-sm">{a.descricao}</p>
-                              <p className="text-xs text-gray-600">
-                                {a.data} às {a.hora} com <span className="font-bold">{a.manicure?.nome}</span>
+                              <p className="font-bold text-pink-700 text-lg">{a.descricao}</p>
+                              
+                              {/* 💅 AQUI ESTÁ A MUDANÇA: Exibe o nome da Manicure */}
+                              <p className="text-sm text-gray-800 font-medium mt-1">
+                                💅 Com: {a.manicure ? a.manicure.nome : "Profissional"}
+                              </p>
+
+                              <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                📅 {a.data} às {a.hora}
                               </p>
                           </div>
-                          <button 
-                            onClick={() => handleDelete(a.idAgendamento)} 
-                            className="bg-white text-red-500 hover:text-red-700 border border-red-100 p-2 rounded-lg text-xs font-bold transition"
-                          >
+                          
+                          <button onClick={() => handleDelete(a.idAgendamento)} className="text-xs text-red-500 font-bold border border-red-200 bg-red-50 px-3 py-1 rounded hover:bg-red-100 transition">
                             Cancelar
                           </button>
                       </li>
@@ -155,7 +124,6 @@ export default function CriarAgendamento() {
               </ul>
           )}
       </div>
-
     </div>
   );
 }

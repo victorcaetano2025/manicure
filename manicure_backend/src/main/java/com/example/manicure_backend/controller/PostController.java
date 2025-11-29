@@ -5,7 +5,6 @@ import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.service.PostService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
@@ -18,26 +17,16 @@ public class PostController {
         this.postService = postService;
     }
 
-    // 🔹 Listar todos os posts (DTO)
+    // 🔴 ALTERADO: Agora aceita token opcional para verificar likes
     @GetMapping
-    public ResponseEntity<List<PostDTO>> listarTodos() {
-        return ResponseEntity.ok(postService.listarTodosDTO());
+    public ResponseEntity<List<PostDTO>> listarTodos(@RequestHeader(value = "Authorization", required = false) String authHeader) {
+        return ResponseEntity.ok(postService.listarTodosDTO(authHeader));
     }
 
-    // 🔹 Buscar post por ID (DTO)
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> buscarPorId(@PathVariable Long id) {
-        return postService.buscarPorIdDTO(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // 🔹 Criar post
+    // ... (Mantenha os outros métodos como criar, atualizar, deletar e buscarPorId iguais) ...
+    // Apenas certifique-se de que o criarPost chame o service.salvar corretamente
     @PostMapping
-    public ResponseEntity<?> criarPost(
-            @RequestBody Post post,
-            @RequestHeader("Authorization") String authHeader
-    ) {
+    public ResponseEntity<?> criarPost(@RequestBody Post post, @RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
             Post salvo = postService.salvar(post, token);
@@ -46,49 +35,13 @@ public class PostController {
             return ResponseEntity.status(403).body(e.getMessage());
         }
     }
-
-    // 🔹 Atualizar post
-    @PutMapping("/{id}")
-    public ResponseEntity<?> atualizar(
-            @PathVariable Long id,
-            @RequestBody Post post,
-            @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
-        try {
-            String token = (authHeader != null) ? authHeader.replace("Bearer ", "") : null;
-            Post atualizado = postService.atualizar(id, post, token);
-            return ResponseEntity.ok(atualizado);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
-        }
-    }
-
-    // 🔹 Deletar post
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deletar(
-            @PathVariable Long id,
-            @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
-        try {
-            String token = (authHeader != null) ? authHeader.replace("Bearer ", "") : null;
-            postService.deletar(id, token);
-            return ResponseEntity.noContent().build();
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(403).body(e.getMessage());
-        }
-    }
-
+    
+    // ... métodos /my, delete, etc.
     @GetMapping("/my")
-    public ResponseEntity<List<PostDTO>> listarMeusPosts(
-            @RequestHeader("Authorization") String authHeader
-    ) {
+    public ResponseEntity<List<PostDTO>> listarMeusPosts(@RequestHeader("Authorization") String authHeader) {
         try {
             String token = authHeader.replace("Bearer ", "");
-            List<PostDTO> meusPosts = postService.listarPostsPorUsuarioLogado(token);
-            return ResponseEntity.ok(meusPosts);
-        } catch (RuntimeException e) {
-            // Se o token for inválido, expirado ou não fornecido
-            return ResponseEntity.status(401).body(null); 
-        }
+            return ResponseEntity.ok(postService.listarPostsPorUsuarioLogado(token));
+        } catch (Exception e) { return ResponseEntity.status(401).build(); }
     }
 }

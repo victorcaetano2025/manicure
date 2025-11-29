@@ -1,6 +1,6 @@
 package com.example.manicure_backend.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference; // Importante trocar para ManagedReference se der erro de loop
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,8 +17,10 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long idUsuario;
 
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference // evita loop recursivo (o lado "pai" da relação)
+    // 🔴 MUDANÇA AQUI: De LAZY para EAGER
+    // Isso garante que os dados de manicure (especialidade/regiao) venham sempre.
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonManagedReference // Ajuda a serializar corretamente o complemento
     private Complementos complemento;
 
     @Column(nullable = false)

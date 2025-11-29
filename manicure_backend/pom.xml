@@ -57,10 +57,17 @@
             <scope>runtime</scope>
         </dependency>
 
-        <!-- Banco de Dados -->
+       <!-- Banco H2 (Para testes locais e professor) -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Banco PostgreSQL (Para o Render/Nuvem) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 

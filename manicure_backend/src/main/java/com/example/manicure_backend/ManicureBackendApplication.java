@@ -6,8 +6,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class ManicureBackendApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(ManicureBackendApplication.class, args);
-	}
-
+    public static void main(String[] args) {
+        SpringApplication.run(ManicureBackendApplication.class, args);
+    }
 }

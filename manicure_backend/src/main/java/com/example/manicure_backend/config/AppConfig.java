@@ -7,9 +7,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class AppConfig {
-
-    // 🔴 Movemos o PasswordEncoder para cá para que o UsuarioService
-    // possa injetá-lo sem criar um ciclo com o SecurityConfig.
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

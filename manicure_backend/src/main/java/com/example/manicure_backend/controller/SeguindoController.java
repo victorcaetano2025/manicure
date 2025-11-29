@@ -1,139 +1,81 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.service.SeguindoService;
 import com.example.manicure_backend.DTO.SeguindoRequestDTO;
-import com.example.manicure_backend.security.CustomUserDetails;
-
-import java.util.NoSuchElementException;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.manicure_backend.repository.UsuarioRepository;
+import com.example.manicure_backend.service.SeguindoService;
+import lombok.RequiredArgsConstructor; // <--- IMPORTANTE
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
+
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/follow")
+@RequiredArgsConstructor // <--- ISSO CORRIGE O ERRO 500 (Injeta os repositórios automaticamente)
 public class SeguindoController {
 
-    @Autowired
-    private SeguindoService seguindoService;
-    
-    /**
-     * Método auxiliar para obter o ID do usuário logado de forma otimizada.
-     * @return O ID do usuário autenticado.
-     */
+    private final SeguindoService seguindoService;
+    private final UsuarioRepository usuarioRepository; // <--- Agora não será mais nulo!
+
     private Long getRequesterId() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         
-        Object principal = authentication.getPrincipal();
-        
-        if (principal instanceof CustomUserDetails) {
-            // Extrai o ID diretamente do objeto de detalhes do usuário
-            return ((CustomUserDetails) principal).getIdUsuario(); 
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new IllegalStateException("Usuário não autenticado");
         }
         
-        // Se a autenticação não estiver presente ou for inválida
-        throw new IllegalStateException("Acesso não autorizado. O ID do usuário logado não pôde ser extraído.");
+        // O JWT Filter define o principal como String (email)
+        String email = authentication.getPrincipal().toString();
+        
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalStateException("Usuário logado não encontrado no banco"))
+                .getIdUsuario();
     }
 
-    // ----------------------------------------------------
-    // 1. SEGUIR USUÁRIO (FOLLOW)
-    // URL: POST /api/follow (Recebe ID no corpo JSON)
-    // ----------------------------------------------------
-    
-    /**
-     * Endpoint para seguir um usuário, recebendo o ID no CORPO (JSON).
-     * Mapeia para: POST /api/follow
-     * Retorna apenas o status 201 Created no sucesso (ResponseEntity<Void>).
-     * @param request DTO contendo apenas o ID do usuário a ser seguido (seguidoId).
-     */
+    // 1. SEGUIR
     @PostMapping
     public ResponseEntity<Void> follow(@RequestBody SeguindoRequestDTO request) {
-        
         try {
-            Long seguidorId = getRequesterId(); 
-            
-            // Chama o Service. Não precisamos do ID de retorno, apenas da execução.
+            Long seguidorId = getRequesterId();
+            // System.out.println("Seguindo ID: " + request.getSeguidoId()); // Debug se precisar
             seguindoService.follow(seguidorId, request.getSeguidoId());
-            
-            // Retorna 201 CREATED com corpo vazio
             return ResponseEntity.status(HttpStatus.CREATED).build();
-            
         } catch (IllegalStateException e) {
-            // Regras de negócio violadas (ex: já segue, segue a si mesmo) -> 400 Bad Request
-            return ResponseEntity.badRequest().build(); 
-        } catch (NoSuchElementException e) { 
-            // Usuário alvo (seguido) não encontrado -> 404 Not Found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            return ResponseEntity.badRequest().build(); // Erro de regra (já segue, etc)
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.notFound().build(); // Usuário alvo não existe
         } catch (Exception e) {
-            // Erro interno (500)
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            e.printStackTrace(); // Mostra erro no console do Java
+            return ResponseEntity.internalServerError().build();
         }
     }
-    
-    // ----------------------------------------------------
-    // 2. DEIXAR DE SEGUIR USUÁRIO (UNFOLLOW)
-    // URL: DELETE /api/follow (Recebe ID no corpo JSON)
-    // ----------------------------------------------------
-    
-    /**
-     * Endpoint para deixar de seguir um usuário, recebendo o ID no CORPO (JSON).
-     * Mapeia para: DELETE /api/follow
-     * Retorna apenas o status 204 No Content no sucesso (ResponseEntity<Void>).
-     * @param request DTO contendo apenas o ID do usuário a ser deixado de seguir (seguidoId).
-     */
+
+    // 2. DEIXAR DE SEGUIR
     @DeleteMapping
     public ResponseEntity<Void> unfollow(@RequestBody SeguindoRequestDTO request) {
-        
         try {
-            Long seguidorId = getRequesterId(); 
-            // Chama o Service.
-            seguindoService.unfollow(seguidorId, request.getSeguidoId()); 
-            
-            // Retorna 204 No Content para deleção bem-sucedida
-            return ResponseEntity.noContent().build(); 
-            
-        } catch (NoSuchElementException e) {
-            // Relacionamento não existe ou usuário alvo não existe -> 404 Not Found
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+            Long seguidorId = getRequesterId();
+            seguindoService.unfollow(seguidorId, request.getSeguidoId());
+            return ResponseEntity.noContent().build();
         } catch (Exception e) {
-            // Erro interno (500)
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
-    // ----------------------------------------------------
-    // 3. VERIFICAR STATUS DE SEGUIMENTO
-    // URL: GET /api/follow/status/{id} (Recebe ID na URL)
-    // ----------------------------------------------------
-    
-    /**
-     * Endpoint para verificar se o usuário logado está seguindo o usuário alvo.
-     * Mapeia para: GET /api/follow/status/{id}
-     * @param id ID do usuário alvo para checar o status de seguimento.
-     * @return true ou false
-     */
+    // 3. STATUS
     @GetMapping("/status/{id}")
     public ResponseEntity<Boolean> getFollowingStatus(@PathVariable Long id) {
         try {
             Long seguidorId = getRequesterId();
+            if (seguidorId.equals(id)) return ResponseEntity.ok(true);
             
-            // Verifica se o usuário logado está tentando checar a si mesmo
-            if (seguidorId.equals(id)) {
-                return ResponseEntity.ok(true); 
-            }
-            
-            // O Service executa a checagem otimizada no Repository
             boolean isFollowing = seguindoService.isFollowing(seguidorId, id);
-            return ResponseEntity.ok(isFollowing); // Retorna true ou false (200 OK)
-            
-        } catch (IllegalStateException e) {
-             // Falha na autenticação (caso não houvesse o throw) -> 401 Unauthorized
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); 
+            return ResponseEntity.ok(isFollowing);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.ok(false);
         }
     }
 }

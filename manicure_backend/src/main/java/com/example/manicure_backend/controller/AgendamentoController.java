@@ -6,9 +6,8 @@ import com.example.manicure_backend.service.AgendamentoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/agendamentos")
@@ -17,58 +16,42 @@ public class AgendamentoController {
 
     private final AgendamentoService service;
 
-    // Listar todos (Admin/Debug)
-    @GetMapping
-    public List<Agendamento> listarTodos() {
-        return service.listarTodos();
-    }
-
-    // Listar MEUS agendamentos (Eu como Cliente)
+    // Rota para o CLIENTE ver o que ele marcou
     @GetMapping("/meus")
-    public ResponseEntity<?> meusAgendamentos(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.replace("Bearer ", "");
-            return ResponseEntity.ok(service.listarMeusAgendamentos(token));
-        } catch (Exception e) {
-            return ResponseEntity.status(403).body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<List<Agendamento>> listarMeusAgendamentos(@RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(service.listarMeusAgendamentos(token.replace("Bearer ", "")));
     }
 
-    // Listar MINHA AGENDA (Eu como Manicure vendo meus trabalhos)
+    // Rota para a MANICURE ver quem marcou com ela
     @GetMapping("/minha-agenda")
-    public ResponseEntity<?> minhaAgenda(@RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.replace("Bearer ", "");
-            return ResponseEntity.ok(service.listarAgendaManicure(token));
-        } catch (Exception e) {
-            return ResponseEntity.status(403).body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<List<Agendamento>> listarAgendaManicure() {
+        return ResponseEntity.ok(service.listarAgendaManicurePeloLogin());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Agendamento> buscarPorId(@PathVariable Long id) {
-        return service.buscarPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    // 🔹 CRIAR (POST) - Agora usa o DTO e o Token
+    // Criar
     @PostMapping
-    public ResponseEntity<?> criar(
-            @RequestBody AgendamentoRequestDTO dto,
-            @RequestHeader("Authorization") String authHeader) {
-        try {
-            String token = authHeader.replace("Bearer ", "");
-            Agendamento novo = service.criar(dto, token);
-            return ResponseEntity.status(201).body(novo);
-        } catch (RuntimeException e) {
-            return ResponseEntity.badRequest().body(Map.of("erro", e.getMessage()));
-        }
+    public ResponseEntity<Agendamento> criar(@RequestBody AgendamentoRequestDTO dto,
+            @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(service.criar(dto, token.replace("Bearer ", "")));
     }
 
+    // Deletar (Cancelar)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletar(@PathVariable Long id) {
         service.deletar(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Agendamento> buscarPorId(@PathVariable Long id) {
+        // 1. Buscamos de forma explícita
+        Optional<Agendamento> agendamentoOpt = service.buscarPorId(id);
+
+        // 2. Verificamos se existe com IF
+        if (agendamentoOpt.isPresent()) {
+            return ResponseEntity.ok(agendamentoOpt.get());
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

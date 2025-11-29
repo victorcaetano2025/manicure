@@ -1,18 +1,25 @@
 package com.example.manicure_backend.DTO;
-// ... imports
 
 import java.time.LocalDate;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class PostDTO {
     private Long idPost;
     private String titulo;
     private String descricao;
-    private String urlImagem; // 💡 NOVO CAMPO
+    private String urlImagem;
     private LocalDate data;
-    private String authorNome;
+    
+    // 🔴 DADOS OBRIGATÓRIOS PARA O FRONT
+    private Long idAuthor;
+    private String authorNome; 
+    private String authorFoto;
+
+    private long likesCount;
+    private boolean likedByMe;
 }
