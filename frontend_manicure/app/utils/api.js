@@ -1,4 +1,5 @@
-const API_URL = "http://localhost:8080";
+// Se tiver variável de ambiente, usa ela. Se não, usa localhost.
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
 
 // --- CONFIGURAÇÃO, TOKENS E USUÁRIO ---
 
