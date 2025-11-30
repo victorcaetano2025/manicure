@@ -1,6 +1,6 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.DTO.UsuarioDTO; // DTO Maiúsculo
+import com.example.manicure_backend.dto.UsuarioDTO; // DTO Maiúsculo
 import com.example.manicure_backend.model.Usuario;
 import com.example.manicure_backend.service.UsuarioService;
 import lombok.RequiredArgsConstructor;

@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Inter } from 'next/font/google'
+import Gato from "../comp/Hedo"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="pt-br">
       <body className={`${inter.className} bg-gray-50 dark:bg-black min-h-screen text-black dark:text-white`}>
+        <Gato />
         {children}
       </body>
     </html>

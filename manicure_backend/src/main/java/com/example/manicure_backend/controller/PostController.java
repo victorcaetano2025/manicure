@@ -1,6 +1,6 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.DTO.PostDTO;
+import com.example.manicure_backend.dto.PostDTO;
 import com.example.manicure_backend.model.Post;
 import com.example.manicure_backend.service.PostService;
 import org.springframework.http.ResponseEntity;

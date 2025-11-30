@@ -1,4 +1,4 @@
-package com.example.manicure_backend.DTO;
+package com.example.manicure_backend.dto;
 
 import com.example.manicure_backend.model.StatusAgendamento;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.example.manicure_backend.DTO;
+package com.example.manicure_backend.dto;
 public class SeguindoRequestDTO {
     
     private Long seguidoId;

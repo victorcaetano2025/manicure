@@ -1,6 +1,6 @@
 package com.example.manicure_backend.service;
 
-import com.example.manicure_backend.DTO.AgendamentoRequestDTO;
+import com.example.manicure_backend.dto.AgendamentoRequestDTO;
 import com.example.manicure_backend.model.*;
 import com.example.manicure_backend.repository.*;
 import com.example.manicure_backend.security.JwtUtil;

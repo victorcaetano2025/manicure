@@ -1,6 +1,6 @@
 package com.example.manicure_backend.service;
 
-import com.example.manicure_backend.DTO.UsuarioDTO;
+import com.example.manicure_backend.dto.UsuarioDTO;
 import com.example.manicure_backend.model.*;
 import com.example.manicure_backend.repository.*;
 import lombok.RequiredArgsConstructor;

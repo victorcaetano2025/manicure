@@ -1,6 +1,6 @@
 package com.example.manicure_backend.controller;
 
-import com.example.manicure_backend.DTO.AgendamentoRequestDTO;
+import com.example.manicure_backend.dto.AgendamentoRequestDTO;
 import com.example.manicure_backend.model.Agendamento;
 import com.example.manicure_backend.service.AgendamentoService;
 import lombok.RequiredArgsConstructor;
